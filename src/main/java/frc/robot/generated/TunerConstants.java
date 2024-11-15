@@ -68,8 +68,8 @@ public class TunerConstants {
     private static final double kSteerGearRatio = 13.371428571428572;
     private static final double kWheelRadiusInches = 2;
 
-    private static final boolean kInvertLeftSide = true;
-    private static final boolean kInvertRightSide = false;
+    private static final boolean kInvertLeftSide = false;
+    private static final boolean kInvertRightSide = true;
 
     private static final String kCANbusName = "";
     private static final int kPigeonId = 6;
@@ -122,7 +122,7 @@ public class TunerConstants {
     private static final int kFrontRightDriveMotorId = 7;
     private static final int kFrontRightSteerMotorId = 8;
     private static final int kFrontRightEncoderId = 9;
-    private static final double kFrontRightEncoderOffset = -0.345703125;
+    private static final double kFrontRightEncoderOffset = 0.3212890625;
     private static final boolean kFrontRightSteerInvert = true;
 
     private static final double kFrontRightXPosInches = 11.5;
