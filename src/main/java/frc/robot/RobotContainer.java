@@ -28,7 +28,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 public class RobotContainer {
   private double governor = 0.35; // Added to slow MaxSpeed to 35%. Set to 1 for full speed.
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12VoltsMps desired top speed
-  private double MaxAngularRate = RotationsPerSecond.of(1.5*Math.PI).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+  private double MaxAngularRate = RotationsPerSecond.of(1*Math.PI).in(RadiansPerSecond); // 1/2 of a rotation per second max angular velocity
 
   private final CommandXboxController joystick = new CommandXboxController(0);
 
