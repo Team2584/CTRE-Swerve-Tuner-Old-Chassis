@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,11 +48,14 @@ public class RobotContainer {
   /* Path follower */
   private final SendableChooser<Command> autoChooser;
 
-  public RobotContainer() {
-      autoChooser = AutoBuilder.buildAutoChooser("Tests");
-      SmartDashboard.putData("Auto Mode", autoChooser);
+   private final Field2d m_field = new Field2d();
 
-      configureBindings();
+  public RobotContainer() {
+        autoChooser = AutoBuilder.buildAutoChooser("Tests");
+        SmartDashboard.putData("Auto Mode", autoChooser);
+        SmartDashboard.putData("Field", m_field);
+
+        configureBindings();
   }
 
   private void configureBindings() {
