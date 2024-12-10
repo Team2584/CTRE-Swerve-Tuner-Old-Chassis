@@ -67,7 +67,7 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto Mode", autoChooser);
         SmartDashboard.putData("Field", m_field);
-
+        
         configureBindings();
   }
 
