@@ -18,11 +18,14 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Arm;
 
 
 public class RobotContainer {
@@ -35,6 +38,10 @@ public class RobotContainer {
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+  private final Arm arm = new Arm(16,15);
+
+  Trigger bucketCurrentTrigger = new Trigger(arm::hasBucket);
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -70,7 +77,7 @@ public class RobotContainer {
           )
       );
 
-      joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    //   joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
       joystick.b().whileTrue(drivetrain.applyRequest(() ->
           point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
       ));
@@ -91,6 +98,13 @@ public class RobotContainer {
 
       // reset the field-centric heading on left bumper press
       joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+      joystick.rightTrigger().whileTrue(arm.armDown().withTimeout(3).andThen(arm.setOuttake())).whileFalse(arm.killIntake().andThen(arm.armUp()));
+      joystick.rightBumper().whileTrue(arm.setIntake().andThen(arm.armDown())).whileFalse(arm.killIntake().andThen(arm.armUp()));
+      joystick.leftTrigger().whileTrue(arm.armDown());
+      joystick.a().whileTrue(arm.armUp());
+      bucketCurrentTrigger.whileTrue(arm.killIntake().andThen(arm.armUp()));
+
 
       drivetrain.registerTelemetry(logger::telemeterize);
   }
