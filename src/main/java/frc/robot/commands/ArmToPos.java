@@ -19,7 +19,7 @@ public class ArmToPos extends Command {
     private double allowed_error;
 
 
-    public ArmToPos (ArmSubsystem armSubsystem, double setpoint){
+    public ArmToPos(ArmSubsystem armSubsystem, double setpoint){
         this.armSubsystem = armSubsystem;
         this.setpoint = setpoint;
         this.allowed_error = 0.05;

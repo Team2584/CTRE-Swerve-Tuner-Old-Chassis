@@ -52,7 +52,7 @@ public class RobotContainer {
     private final Field2d m_field = new Field2d();
 
     private ArmSubsystem buildArm() {
-        return new ArmSubsystem();
+        return new ArmSubsystem(0, 0);
     }
 
     public ArmSubsystem getArm(){
