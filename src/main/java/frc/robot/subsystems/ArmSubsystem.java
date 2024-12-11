@@ -18,7 +18,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Arm extends SubsystemBase {
+public class ArmSubsystem extends SubsystemBase {
     private static final TalonFXConfiguration flipperConfig = new TalonFXConfiguration();
     private static final TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
     private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
@@ -26,7 +26,7 @@ public class Arm extends SubsystemBase {
     private final TalonFX flipper;
     private final TalonFX intake;
 
-    public Arm(int flipperId, int intakeId) {
+    public ArmSubsystem(int flipperId, int intakeId) {
         flipper = new TalonFX(flipperId);
         intake = new TalonFX(intakeId);
 
