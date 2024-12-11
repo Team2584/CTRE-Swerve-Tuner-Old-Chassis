@@ -16,11 +16,13 @@ import frc.robot.subsystems.ArmSubsystem;
 public class ArmToPos extends Command {
     private final ArmSubsystem armSubsystem;
     private double setpoint;
+    private double allowed_error;
 
 
     public ArmToPos (ArmSubsystem armSubsystem, double setpoint){
         this.armSubsystem = armSubsystem;
         this.setpoint = setpoint;
+        this.allowed_error = 0.05;
 
         addRequirements(armSubsystem);
     }
@@ -58,6 +60,10 @@ public class ArmToPos extends Command {
 
     @Override
     public boolean isFinished() {
+        if (armSubsystem.getFlipper().getPosition().getValueAsDouble() < setpoint+allowed_error && 
+            armSubsystem.getFlipper().getPosition().getValueAsDouble() > setpoint-allowed_error ){
+                return true;
+            }
         return false;
     }
 
