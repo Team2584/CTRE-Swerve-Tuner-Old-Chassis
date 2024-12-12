@@ -68,7 +68,7 @@ public class RobotContainer {
 
     private final ArmSubsystem arm = buildArm();
 
-    private final IntakeBucket intakeBucketCommand = new IntakeBucket();
+    private final IntakeBucket intakeBucketCommand = new IntakeBucket(arm);
 
 
   public RobotContainer() {
@@ -114,7 +114,7 @@ public class RobotContainer {
       // reset the field-centric heading on left bumper press
       joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      joystick.rightTrigger().whileTrue();
+      joystick.rightTrigger().whileTrue(IntakeBucket(arm));
       joystick.rightBumper().whileTrue(arm.setIntake().andThen(arm.armDown())).whileFalse(arm.killIntake().andThen(arm.armUp()));
       joystick.leftTrigger().whileTrue(arm.armDown());
       joystick.a().whileTrue(IntakeBucket(arm));
