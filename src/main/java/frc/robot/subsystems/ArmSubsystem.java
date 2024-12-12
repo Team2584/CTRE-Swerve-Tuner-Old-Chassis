@@ -35,6 +35,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         m_mmReq = new MotionMagicVoltage(0);
 
+
         FeedbackConfigs fdb = flipperConfig.Feedback;
         fdb.SensorToMechanismRatio = 85.33; // 12.8 rotor rotations per mechanism rotation
 
@@ -65,7 +66,6 @@ public class ArmSubsystem extends SubsystemBase {
 
      /**
      * Set speed of claw motor 
-     *
      */
     public void setClawSpeed(double speed){
         m_claw.set(speed);
@@ -73,12 +73,16 @@ public class ArmSubsystem extends SubsystemBase {
 
      /**
      * Set speed of flipper motor 
-     *
      */
     public void setFlipperSpeed(double speed){
         m_flipper.set(speed);
     }
 
+    /**
+     * Checks if claw motor is stalling/is experiencing a current spike due to successful intake
+     *
+     * @return True or False
+     */
     public boolean holdingBucket(){
         double clawCurrent = m_claw.getStatorCurrent().getValueAsDouble();
         // System.out.println("INTAKE CURRENT: " + intakecur);
@@ -114,6 +118,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        holdingBucket();
         // This method will be called once per scheduler run
     }
 

@@ -9,9 +9,10 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ArmSubsystem;
 
-public class IntakeBucket extends Command {
+public class OuttakeBucket extends Command {
     private final ArmSubsystem armSubsystem;
-    public IntakeBucket (ArmSubsystem armSubsystem){
+    
+    public OuttakeBucket (ArmSubsystem armSubsystem){
         this.armSubsystem = armSubsystem;
         
 
@@ -24,7 +25,7 @@ public class IntakeBucket extends Command {
 
     @Override
     public void execute() {
-        armSubsystem.setClawSpeed(-0.25);
+        armSubsystem.setClawSpeed(0.15);
     }
 
     @Override
@@ -34,9 +35,6 @@ public class IntakeBucket extends Command {
 
     @Override
     public boolean isFinished() {
-        if (armSubsystem.holdingBucket()){
-            return true;
-        }
         return false;
     }
 

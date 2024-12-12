@@ -20,15 +20,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.IntakeBucket;
-import frc.robot.commands.IntakeBuc;
-import frc.robot.commands.ArmFlipLower;
-import frc.robot.commands.ArmFlipUpper;
+import frc.robot.commands.OuttakeBucket;
+import frc.robot.commandgroup.PickupBucket;
 import frc.robot.commands.ArmToPos;
-import frc.robot.commands.IntakeBucket;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -115,13 +114,14 @@ public class RobotContainer {
       joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
       // reset the field-centric heading on left bumper press
-      joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+      joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      joystick.leftTrigger().whileTrue(new IntakeBucket(arm));
-      joystick.rightTrigger().whileTrue(new ArmFlipLower(arm));
-      joystick.rightBumper().whileTrue(new ArmFlipUpper(arm) );
-      joystick.a().whileTrue(arm.runOnce(() -> arm.setClawSpeed(-0.25))).whileFalse(arm.runOnce(() -> arm.setClawSpeed(0)));
-      joystick.a().whileTrue(arm.runOnce(() -> arm.setClawSpeed(0.15))).whileFalse(arm.runOnce(() -> arm.setClawSpeed(0)));
+      joystick.leftTrigger().whileTrue(new PickupBucket(arm)).onFalse((arm.runOnce(() -> arm.setClawSpeed(0)).andThen(new ArmToPos(arm, 0))));
+      joystick.rightTrigger().toggleOnTrue(new ArmToPos(arm, -0.47)).toggleOnFalse(new ArmToPos(arm, 0));
+      joystick.leftBumper().whileTrue(new ArmToPos(arm,-0.25)).onFalse(new ArmToPos(arm,0));
+      joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(arm));
+      joystick.x().whileTrue(arm.runOnce(() -> arm.setClawSpeed(0.15))).whileFalse(arm.runOnce(() -> arm.setClawSpeed(0)));
+
 
 
       drivetrain.registerTelemetry(logger::telemeterize);
