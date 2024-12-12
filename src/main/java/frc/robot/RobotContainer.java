@@ -22,11 +22,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.commands.IntakeBucket;
+import frc.robot.commands.ArmFlipLower;
+import frc.robot.commands.ArmFlipUpper;
+import frc.robot.commands.ArmToPos;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.ArmSubsystem;
 
 
 public class RobotContainer {
@@ -56,7 +58,7 @@ public class RobotContainer {
     private final Field2d m_field = new Field2d();
 
     private ArmSubsystem buildArm() {
-        return new ArmSubsystem();
+        return new ArmSubsystem(15,16);
     }
 
     public ArmSubsystem getArm(){
@@ -65,6 +67,7 @@ public class RobotContainer {
 
 
     private final ArmSubsystem arm = buildArm();
+
 
   public RobotContainer() {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
@@ -109,10 +112,10 @@ public class RobotContainer {
       // reset the field-centric heading on left bumper press
       joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      joystick.rightTrigger().whileTrue(arm.armDown().withTimeout(3).andThen(arm.setOuttake())).whileFalse(arm.killIntake().andThen(arm.armUp()));
+      joystick.rightTrigger().whileTrue(Commands.run(new IntakeBucket(arm).schedule()));
       joystick.rightBumper().whileTrue(arm.setIntake().andThen(arm.armDown())).whileFalse(arm.killIntake().andThen(arm.armUp()));
       joystick.leftTrigger().whileTrue(arm.armDown());
-      joystick.a().whileTrue(arm.armUp());
+      joystick.a().whileTrue(IntakeBucket(arm));
       bucketCurrentTrigger.whileTrue(arm.killIntake().andThen(arm.armUp()));
 
 
