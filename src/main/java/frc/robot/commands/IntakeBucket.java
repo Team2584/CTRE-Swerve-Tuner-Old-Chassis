@@ -29,7 +29,7 @@ public class IntakeBucket extends Command {
     public void execute() {
         armSubsystem.setClawSpeed(-0.25);
         if (!lowerArmSchedueled){
-            new ArmFlipLower(armSubsystem).schedule();
+            armLowerCommand.schedule();
             lowerArmSchedueled = true;
         }
 
