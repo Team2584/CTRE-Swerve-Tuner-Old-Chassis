@@ -1,9 +1,19 @@
 package frc.robot.commands;
 
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ArmSubsystem;
 
-public class IntakeBucket extends Command {
+public class IntakeB extends Command {
     private final ArmSubsystem armSubsystem;
     private final ArmFlipLower armLowerCommand; // hold a reference to the command
     private final ArmFlipUpper armUpperCommand; // hold a reference to the command
@@ -11,7 +21,7 @@ public class IntakeBucket extends Command {
     private boolean raiseArmSchedueled = false; // To ensure we schedule it only once
 
 
-    public IntakeBucket(ArmSubsystem armSubsystem){
+    public IntakeB (ArmSubsystem armSubsystem){
         this.armSubsystem = armSubsystem;
         this.armLowerCommand = new ArmFlipLower(armSubsystem);
         this.armUpperCommand = new ArmFlipUpper(armSubsystem);
@@ -22,7 +32,6 @@ public class IntakeBucket extends Command {
 
     @Override
     public void initialize(){
-        
     }
 
     @Override
@@ -32,9 +41,7 @@ public class IntakeBucket extends Command {
             armLowerCommand.schedule();
             lowerArmSchedueled = true;
         }
-
     }
-
 
     @Override
     public void end(boolean interrupted) {

@@ -18,14 +18,17 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.IntakeBucket;
+import frc.robot.commands.IntakeBuc;
 import frc.robot.commands.ArmFlipLower;
 import frc.robot.commands.ArmFlipUpper;
 import frc.robot.commands.ArmToPos;
+import frc.robot.commands.IntakeBucket;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -68,16 +71,16 @@ public class RobotContainer {
 
     private final ArmSubsystem arm = buildArm();
 
-    private final IntakeBucket intakeBucketCommand = new IntakeBucket(arm);
-
 
   public RobotContainer() {
-        autoChooser = AutoBuilder.buildAutoChooser("Tests");
 
-        SmartDashboard.putData("Auto Mode", autoChooser);
-        SmartDashboard.putData("Field", m_field);
+    
+    autoChooser = AutoBuilder.buildAutoChooser("Tests");
+
+    SmartDashboard.putData("Auto Mode", autoChooser);
+    SmartDashboard.putData("Field", m_field);
         
-        configureBindings();
+    configureBindings();
   }
 
   private void configureBindings() {
@@ -114,11 +117,11 @@ public class RobotContainer {
       // reset the field-centric heading on left bumper press
       joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      joystick.rightTrigger().whileTrue(IntakeBucket(arm));
-      joystick.rightBumper().whileTrue(arm.setIntake().andThen(arm.armDown())).whileFalse(arm.killIntake().andThen(arm.armUp()));
-      joystick.leftTrigger().whileTrue(arm.armDown());
-      joystick.a().whileTrue(IntakeBucket(arm));
-      bucketCurrentTrigger.whileTrue(arm.killIntake().andThen(arm.armUp()));
+      joystick.leftTrigger().whileTrue(new IntakeBucket(arm));
+      joystick.rightTrigger().whileTrue(new ArmFlipLower(arm));
+      joystick.rightBumper().whileTrue(new ArmFlipUpper(arm) );
+      joystick.a().whileTrue(arm.runOnce(() -> arm.setClawSpeed(-0.25))).whileFalse(arm.runOnce(() -> arm.setClawSpeed(0)));
+      joystick.a().whileTrue(arm.runOnce(() -> arm.setClawSpeed(0.15))).whileFalse(arm.runOnce(() -> arm.setClawSpeed(0)));
 
 
       drivetrain.registerTelemetry(logger::telemeterize);
