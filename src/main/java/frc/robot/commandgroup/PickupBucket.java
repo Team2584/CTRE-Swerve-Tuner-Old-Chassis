@@ -21,12 +21,8 @@ public class PickupBucket extends SequentialCommandGroup{
     addRequirements(flipperSubsystem, clawSubsystem);
 
     addCommands(
-
-        new InstantCommand(()->clawSubsystem.setClawSpeed(-0.25)), 
         
-        new ArmToPos(flipperSubsystem, -0.47), // put arm down
-
-        new IntakeBucket(clawSubsystem),
+        new ParallelCommandGroup(new ArmToPos(flipperSubsystem, -0.47),  new IntakeBucket(clawSubsystem)),
 
         new ArmToPos(flipperSubsystem, 0)
 
