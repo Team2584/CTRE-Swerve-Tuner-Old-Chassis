@@ -18,8 +18,13 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -179,6 +184,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         configureAutoBuilder();
     }
 
+
+
     private void configureAutoBuilder() {
         try {
             var config = RobotConfig.fromGUISettings();
@@ -240,8 +247,24 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return m_sysIdRoutineToApply.dynamic(direction);
     }
 
+   
+
+    StructArrayPublisher<SwerveModuleState> publisher = NetworkTableInstance.getDefault()
+                        .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
+
+
     @Override
     public void periodic() {
+
+    SwerveModuleState[] states = new SwerveModuleState[] {
+        this.getState().ModuleStates[0],
+        this.getState().ModuleStates[1],
+        this.getState().ModuleStates[2],
+        this.getState().ModuleStates[3]
+      };
+
+        publisher.set(states);
+
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.

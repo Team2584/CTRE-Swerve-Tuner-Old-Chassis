@@ -18,7 +18,7 @@ public class OuttakeBucket extends Command {
 
     @Override
     public void execute() {
-        clawSubsystem.setClawSpeed(0.15);
+        clawSubsystem.setClawSpeed(0.2);
     }
 
     @Override

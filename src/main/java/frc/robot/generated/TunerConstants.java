@@ -14,6 +14,8 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.units.measure.*;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -83,8 +85,8 @@ public class TunerConstants {
 
 
     // These are only used for simulation
-    private static final double kSteerInertia = 0.00001;
-    private static final double kDriveInertia = 0.001;
+    private static final double kSteerInertia = 0.004;
+    private static final double kDriveInertia = 0.025;
     // Simulated voltage necessary to overcome friction
     private static final Voltage kSteerFrictionVoltage = Volts.of(0.25);
     private static final Voltage kDriveFrictionVoltage = Volts.of(0.25);
@@ -134,6 +136,7 @@ public class TunerConstants {
 
     private static final Distance kFrontRightXPos = Inches.of(11.5);
     private static final Distance kFrontRightYPos = Inches.of(-10.5);
+    
 
     // Back Left
     private static final int kBackLeftDriveMotorId = 4;
