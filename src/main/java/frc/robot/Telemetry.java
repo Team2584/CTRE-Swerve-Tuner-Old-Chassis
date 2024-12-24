@@ -74,12 +74,7 @@ public class Telemetry {
             .append(new MechanismLigament2d("Direction", 0.1, 0, 0, new Color8Bit(Color.kWhite))),
     };
 
-    // SwerveModuleState[] states = new SwerveModuleState[] {
-    //     new SwerveModuleState(),
-    //     new SwerveModuleState(),
-    //     new SwerveModuleState(),
-    //     new SwerveModuleState()
-    // };
+
 
 
     /* Accept the swerve drive state and telemeterize it to smartdashboard */

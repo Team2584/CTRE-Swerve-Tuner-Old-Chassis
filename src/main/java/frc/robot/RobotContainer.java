@@ -9,15 +9,12 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
 import choreo.util.AllianceFlipUtil.Flipper;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,6 +30,7 @@ import frc.robot.commands.OuttakeBucket;
 import frc.robot.commandgroup.PickupBucket;
 import frc.robot.commands.ArmToPos;
 import frc.robot.generated.TunerConstants;
+import frc.robot.AutoRoutines;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlipperSubsystem;
@@ -42,12 +40,6 @@ public class RobotContainer {
     private double governor = 0.35; // Added to slow MaxSpeed to 35%. Set to 1 for full speed.
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12VoltsMps desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(1*Math.PI).in(RadiansPerSecond); // 1/2 of a rotation per second max angular velocity
-
-    private final CommandXboxController joystick = new CommandXboxController(0);
-
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -59,8 +51,19 @@ public class RobotContainer {
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    /* Path follower */
-    private final SendableChooser<Command> autoChooser;
+
+
+    private final CommandXboxController joystick = new CommandXboxController(0);
+
+    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+                
+    private final Telemetry logger = new Telemetry(MaxSpeed);
+
+
+     /* Path follower */
+    private final AutoFactory autoFactory;
+    private final AutoRoutines autoRoutines;
+    private final AutoChooser autoChooser = new AutoChooser();
 
     private final Field2d m_field = new Field2d();
 
@@ -72,6 +75,7 @@ public class RobotContainer {
         return new FlipperSubsystem(16);
     }
 
+
     private ClawSubsystem getClaw() {
         return claw;
     }
@@ -80,6 +84,7 @@ public class RobotContainer {
         return flipper;
     }
 
+    
     private final ClawSubsystem claw = buildClaw();
     private final FlipperSubsystem flipper = buildFlipper();
 
@@ -87,13 +92,16 @@ public class RobotContainer {
 
   public RobotContainer() {
 
-    
-    autoChooser = AutoBuilder.buildAutoChooser("Tests");
+    autoFactory = drivetrain.createAutoFactory();
+    autoRoutines = new AutoRoutines(autoFactory);
 
-    SmartDashboard.putData("Auto Mode", autoChooser);
+    autoChooser.addRoutine("SimplePath", autoRoutines::simplePathAuto);
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
     SmartDashboard.putData("Field", m_field);
-        
+
     configureBindings();
+
   }
 
   private void configureBindings() {
@@ -136,12 +144,13 @@ public class RobotContainer {
       joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));
       joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
 
-    
+
+
       drivetrain.registerTelemetry(logger::telemeterize);
   }
 
   public Command getAutonomousCommand() {
       /* First put the drivetrain into auto run mode, then run the auto */
-      return autoChooser.getSelected();
+      return autoChooser.selectedCommand();
   }
 }

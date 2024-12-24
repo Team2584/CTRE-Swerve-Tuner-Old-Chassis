@@ -11,12 +11,13 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import choreo.Choreo.TrajectoryLogger;
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoFactory.AutoBindings;
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -49,13 +50,18 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
-    /** Swerve request to apply during robot-centric path following */
-    private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+   /** Swerve request to apply during field-centric path following */
+    private final SwerveRequest.ApplyFieldSpeeds m_pathApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+
+    private final PIDController m_pathXController = new PIDController(1, 0, 0);
+    private final PIDController m_pathYController = new PIDController(1, 0, 0);
+    private final PIDController m_pathThetaController = new PIDController(1.5, 0, 0);
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -89,7 +95,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         )
     );
 
-    /*
+   /*
      * SysId routine for characterizing rotation.
      * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
      * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
@@ -116,31 +122,32 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         )
     );
 
-    /* The SysId routine to test */
-    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+   /* The SysId routine to test */
+   private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+
+
+   /**
+    * Constructs a CTRE SwerveDrivetrain using the specified constants.
+    * <p>
+    * This constructs the underlying hardware devices, so users should not construct
+    * the devices themselves. If they need the devices, they can access them
+    * through getters in the classes.
+    *
+    * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
+    * @param modules             Constants for each specific module
+    */
+   public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants... modules) {
+       super(drivetrainConstants, modules);
+       if (Utils.isSimulation()) {
+           startSimThread();
+       }
+   }
+
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
-     * This constructs the underlying hardware devices, so user should not construct
-     * the devices themselves. If they need the devices, they can access them
-     * through getters in the classes.
-     *
-     * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
-     * @param modules             Constants for each specific module
-     */
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants... modules) {
-        super(drivetrainConstants, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
-        configureAutoBuilder();
-    }
-
-    /**
-     * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     * <p>
-     * This constructs the underlying hardware devices, so user should not construct
+     * This constructs the underlying hardware devices, so users should not construct
      * the devices themselves. If they need the devices, they can access them
      * through getters in the classes.
      *
@@ -155,13 +162,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        configureAutoBuilder();
     }
+
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
-     * This constructs the underlying hardware devices, so user should not construct
+     * This constructs the underlying hardware devices, so users should not construct
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
      *
@@ -181,41 +188,53 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        configureAutoBuilder();
     }
 
 
-
-    private void configureAutoBuilder() {
-        try {
-            var config = RobotConfig.fromGUISettings();
-            AutoBuilder.configure(
-                () -> getState().Pose,   // Supplier of current robot pose
-                this::resetPose,         // Consumer for seeding pose against auto
-                () -> getState().Speeds, // Supplier of current robot speeds
-                // Consumer of ChassisSpeeds and feedforwards to drive the robot
-                (speeds, feedforwards) -> setControl(
-                    m_pathApplyRobotSpeeds.withSpeeds(speeds)
-                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                ),
-                new PPHolonomicDriveController(
-                    // PID constants for translation
-                    new PIDConstants(1, 0, 0),
-                    // PID constants for rotation
-                    new PIDConstants(1.5, 0, 0)
-                ),
-                config,
-                // Assume the path needs to be flipped for Red vs Blue, this is normally the case
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-                this // Subsystem for requirements
-            );
-        } catch (Exception ex) {
-            DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
-        }
+    /**
+     * Creates a new auto factory for this drivetrain.
+     *
+     * @return AutoFactory for this drivetrain
+     */
+    public AutoFactory createAutoFactory() {
+        return createAutoFactory(new AutoBindings());
     }
 
     /**
+     * Creates a new auto factory for this drivetrain with the given
+     * global auto bindings.
+     *
+     * @param autoBindings Global bindings to apply to the factory
+     * @return AutoFactory for this drivetrain
+     */
+    public AutoFactory createAutoFactory(AutoBindings autoBindings) {
+        return createAutoFactory(autoBindings, (sample, isStart) -> {});
+    }
+
+
+    /**
+     * Choreo setup
+     * Creates a new auto factory for this drivetrain with the given
+     * global auto bindings and trajectory logger.
+     *
+     * @param autoBindings Global bindings to apply to the factory
+     * @param trajLogger Logger for the trajectory
+     * @return AutoFactory for this drivetrain
+     */
+    public AutoFactory createAutoFactory(AutoBindings autoBindings, TrajectoryLogger<SwerveSample> trajLogger) {
+        return new AutoFactory(
+            () -> getState().Pose,
+            this::resetPose,
+            this::followPath,
+            true,
+            this,
+            autoBindings,
+            trajLogger
+        );
+    }
+
+
+     /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
      *
      * @param request Function returning the request to apply
@@ -224,6 +243,38 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
     }
+
+
+
+    /**
+     * Follows the given field-centric path sample with PID.
+     *
+     * @param sample Sample along the path to follow
+     */
+    public void followPath(SwerveSample sample) {
+        m_pathThetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        var pose = getState().Pose;
+
+        var targetSpeeds = sample.getChassisSpeeds();
+        targetSpeeds.vxMetersPerSecond += m_pathXController.calculate(
+            pose.getX(), sample.x
+        );
+        targetSpeeds.vyMetersPerSecond += m_pathYController.calculate(
+            pose.getY(), sample.y
+        );
+        targetSpeeds.omegaRadiansPerSecond += m_pathThetaController.calculate(
+            pose.getRotation().getRadians(), sample.heading
+        );
+
+        setControl(
+            m_pathApplyFieldSpeeds.withSpeeds(targetSpeeds)
+                .withWheelForceFeedforwardsX(sample.moduleForcesX())
+                .withWheelForceFeedforwardsY(sample.moduleForcesY())
+        );
+    }
+
+
 
     /**
      * Runs the SysId Quasistatic test in the given direction for the routine
@@ -247,23 +298,27 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return m_sysIdRoutineToApply.dynamic(direction);
     }
 
-   
 
+
+   
+    // Setup for Network tables for swervedrive. Needed for Advantage scope
     StructArrayPublisher<SwerveModuleState> publisher = NetworkTableInstance.getDefault()
                         .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
+
 
 
     @Override
     public void periodic() {
 
-    SwerveModuleState[] states = new SwerveModuleState[] {
-        this.getState().ModuleStates[0],
-        this.getState().ModuleStates[1],
-        this.getState().ModuleStates[2],
-        this.getState().ModuleStates[3]
-      };
+        // Periodically gets data from each of the swerve modules
+        SwerveModuleState[] states = new SwerveModuleState[] {
+            this.getState().ModuleStates[0],
+            this.getState().ModuleStates[1],
+            this.getState().ModuleStates[2],
+            this.getState().ModuleStates[3]
+        };
 
-        publisher.set(states);
+        publisher.set(states); // Publishes swerve module data to Networktables 
 
         /*
          * Periodically try to apply the operator perspective.
