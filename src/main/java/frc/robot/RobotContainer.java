@@ -25,12 +25,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.IntakeBucket;
+import frc.robot.commands.LiftClimber;
 import frc.robot.commands.OuttakeBucket;
 import frc.robot.commandgroup.PickupBucket;
 import frc.robot.commands.ArmToPos;
 import frc.robot.generated.TunerConstants;
 import frc.robot.AutoRoutines;
 import frc.robot.subsystems.ClawSubsystem;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlipperSubsystem;
 
@@ -51,7 +53,6 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
 
-
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -65,6 +66,14 @@ public class RobotContainer {
     private final AutoChooser autoChooser = new AutoChooser();
     
     private final Field2d m_field = new Field2d();
+
+    private Climber buildClimber(){
+      return new Climber(0, 1);
+    }
+
+    private Climber getClimber(){
+      return climber;
+    }
 
     // private ClawSubsystem buildClaw() {
     //     return new ClawSubsystem(15);
@@ -87,6 +96,7 @@ public class RobotContainer {
     // private final ClawSubsystem claw = buildClaw();
     // private final FlipperSubsystem flipper = buildFlipper();
 
+    private final Climber climber = buildClimber();
 
 
   public RobotContainer() {
@@ -140,7 +150,7 @@ public class RobotContainer {
     //   joystick.leftTrigger().whileTrue(new PickupBucket(getFlipper(), getClaw())).onFalse((getClaw().runOnce(() -> getClaw().setClawSpeed(0)).andThen(new ArmToPos(getFlipper(), 0))));
     //   joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
     //   joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
-    //   joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));
+      joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new LiftClimber(getClimber()));
     //   joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
 
 
