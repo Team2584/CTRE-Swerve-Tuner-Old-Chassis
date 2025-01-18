@@ -63,29 +63,29 @@ public class RobotContainer {
     private final AutoFactory autoFactory;
     private final AutoRoutines autoRoutines;
     private final AutoChooser autoChooser = new AutoChooser();
-
+    
     private final Field2d m_field = new Field2d();
 
-    private ClawSubsystem buildClaw() {
-        return new ClawSubsystem(15);
-    }
+    // private ClawSubsystem buildClaw() {
+    //     return new ClawSubsystem(15);
+    // }
 
-    private FlipperSubsystem buildFlipper() {
-        return new FlipperSubsystem(16);
-    }
+    // private FlipperSubsystem buildFlipper() {
+    //     return new FlipperSubsystem(16);
+    // }
 
 
-    private ClawSubsystem getClaw() {
-        return claw;
-    }
+    // private ClawSubsystem getClaw() {
+    //     return claw;
+    // }
 
-    private FlipperSubsystem getFlipper() {
-        return flipper;
-    }
+    // private FlipperSubsystem getFlipper() {
+    //     return flipper;
+    // }
 
     
-    private final ClawSubsystem claw = buildClaw();
-    private final FlipperSubsystem flipper = buildFlipper();
+    // private final ClawSubsystem claw = buildClaw();
+    // private final FlipperSubsystem flipper = buildFlipper();
 
 
 
@@ -94,7 +94,7 @@ public class RobotContainer {
     autoFactory = drivetrain.createAutoFactory();
     autoRoutines = new AutoRoutines(autoFactory);
 
-    autoChooser.addRoutine("SimplePath", autoRoutines::simplePathAuto);
+    autoChooser.addRoutine("TEST", autoRoutines::firsttest);
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     SmartDashboard.putData("Field", m_field);
@@ -137,11 +137,11 @@ public class RobotContainer {
       // reset the field-centric heading on left bumper press
       joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      joystick.leftTrigger().whileTrue(new PickupBucket(getFlipper(), getClaw())).onFalse((getClaw().runOnce(() -> getClaw().setClawSpeed(0)).andThen(new ArmToPos(getFlipper(), 0))));
-      joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
-      joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
-      joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));
-      joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
+    //   joystick.leftTrigger().whileTrue(new PickupBucket(getFlipper(), getClaw())).onFalse((getClaw().runOnce(() -> getClaw().setClawSpeed(0)).andThen(new ArmToPos(getFlipper(), 0))));
+    //   joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
+    //   joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
+    //   joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));
+    //   joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
 
 
 

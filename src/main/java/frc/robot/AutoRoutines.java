@@ -11,13 +11,13 @@ public class AutoRoutines {
         m_factory = factory;
     }
 
-    public AutoRoutine simplePathAuto() {
-        final AutoRoutine routine = m_factory.newRoutine("SimplePath Auto");
-        final AutoTrajectory simplePath = routine.trajectory("SimplePath");
+    public AutoRoutine firsttest() {
+        final AutoRoutine routine = m_factory.newRoutine("test");
+        final AutoTrajectory test = routine.trajectory("test");
 
         routine.active().onTrue(
-            simplePath.resetOdometry()
-                .andThen(simplePath.cmd())
+            test.resetOdometry()
+                .andThen(test.cmd())
         );
         return routine;
     }
