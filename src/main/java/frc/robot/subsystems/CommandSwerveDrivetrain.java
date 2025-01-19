@@ -55,7 +55,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private final PIDController m_pathXController = new PIDController(1, 0, 0);
     private final PIDController m_pathYController = new PIDController(1, 0, 0);
-    private final PIDController m_pathThetaController = new PIDController(1.5, 0, 0);
+    private final PIDController m_pathThetaController = new PIDController(1, 0, 0);
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
