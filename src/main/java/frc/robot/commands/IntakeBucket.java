@@ -17,7 +17,7 @@ public class IntakeBucket extends Command {
 
     @Override
     public void execute() {
-        clawSubsystem.setClawSpeed(-0.25);
+        clawSubsystem.setClawSpeed(0.75);
     }
 
     @Override

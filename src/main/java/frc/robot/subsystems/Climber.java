@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,6 +13,10 @@ public class Climber extends SubsystemBase {
 
     public Climber(int climberCANId1, int climberCANId2) {
         m_climber = new TalonFX[]{new TalonFX(climberCANId1), new TalonFX(climberCANId2)};
+
+        for (TalonFX currentMotor : m_climber) {
+            currentMotor.setNeutralMode(NeutralModeValue.Brake);
+        }
     }
 
      /**

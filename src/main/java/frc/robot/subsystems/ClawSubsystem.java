@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -11,6 +12,8 @@ public class ClawSubsystem extends SubsystemBase {
 
     public ClawSubsystem(int clawCANId) {
         m_claw = new TalonFX(clawCANId);
+
+        m_claw.setNeutralMode(NeutralModeValue.Brake);
     }
 
      /**

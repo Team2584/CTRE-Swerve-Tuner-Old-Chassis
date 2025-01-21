@@ -76,25 +76,25 @@ public class RobotContainer {
       return climber;
     }
 
-    // private ClawSubsystem buildClaw() {
-    //     return new ClawSubsystem(15);
-    // }
+    private ClawSubsystem buildClaw() {
+        return new ClawSubsystem(17);
+    }
 
     // private FlipperSubsystem buildFlipper() {
     //     return new FlipperSubsystem(16);
     // }
 
 
-    // private ClawSubsystem getClaw() {
-    //     return claw;
-    // }
+    private ClawSubsystem getClaw() {
+        return claw;
+    }
 
     // private FlipperSubsystem getFlipper() {
     //     return flipper;
     // }
 
     
-    // private final ClawSubsystem claw = buildClaw();
+    private final ClawSubsystem claw = buildClaw();
     // private final FlipperSubsystem flipper = buildFlipper();
 
     private final Climber climber = buildClimber();
@@ -146,14 +146,15 @@ public class RobotContainer {
       joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
       // reset the field-centric heading on left bumper press
-      joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+      //joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
     //   joystick.leftTrigger().whileTrue(new PickupBucket(getFlipper(), getClaw())).onFalse((getClaw().runOnce(() -> getClaw().setClawSpeed(0)).andThen(new ArmToPos(getFlipper(), 0))));
     //   joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
     //   joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
       joystick.leftBumper().whileTrue(new LiftClimber(getClimber()));
       joystick.rightBumper().whileTrue(new ResetClimber(getClimber()));
-    //   joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
+      joystick.x().whileTrue(new IntakeBucket(getClaw()));
+      joystick.y().whileTrue(new OuttakeBucket(getClaw()));
 
 
 
