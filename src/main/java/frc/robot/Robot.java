@@ -39,6 +39,8 @@ public class Robot extends LoggedRobot {
 
   public Robot() {
 
+    Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
+
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
       case REAL:
