@@ -14,6 +14,7 @@ import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.IntakeBucket;
@@ -53,6 +55,16 @@ public class RobotContainer {
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
+    
+      // Button board initialization
+    private final Joystick m_buttonBoard = new Joystick(2);
+
+    private final JoystickButton m_button0 = new JoystickButton(m_buttonBoard, 1);
+    private final JoystickButton m_button1 = new JoystickButton(m_buttonBoard, 2);
+    private final JoystickButton m_button2 = new JoystickButton(m_buttonBoard, 3);
+    private final JoystickButton m_button3 = new JoystickButton(m_buttonBoard, 4);
+    private final JoystickButton m_button4 = new JoystickButton(m_buttonBoard, 5);
+    private final JoystickButton m_button5 = new JoystickButton(m_buttonBoard, 6);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 
@@ -124,6 +136,24 @@ public class RobotContainer {
                   .withVelocityY(-joystick.getLeftX() * MaxSpeed * governor) // Drive left with negative X (left)
                   .withRotationalRate(-joystick.getRightX() * MaxAngularRate * governor) // Drive counterclockwise with negative X (left)
           )
+      );
+      m_button0.toggleOnTrue(
+      new LiftClimber(getClimber())
+      );
+      m_button1.onTrue(
+        new InstantCommand(() -> System.out.println("Button 1 pressed!"))
+      );
+      m_button2.onTrue(
+        new InstantCommand(() -> System.out.println("Button 2 pressed!"))
+      );
+      m_button3.onTrue(
+        new InstantCommand(() -> System.out.println("Button 3 pressed!"))
+      );
+      m_button4.onTrue(
+        new InstantCommand(() -> System.out.println("Button 4 pressed!"))
+      );
+      m_button5.onTrue(
+        new InstantCommand(() -> System.out.println("Button 5 pressed!"))
       );
 
     //   joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
