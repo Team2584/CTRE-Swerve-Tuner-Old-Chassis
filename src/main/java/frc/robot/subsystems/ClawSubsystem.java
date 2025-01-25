@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClawSubsystem extends SubsystemBase {
@@ -30,7 +31,8 @@ public class ClawSubsystem extends SubsystemBase {
      */
     public boolean holdingBucket(){
         double clawCurrent = m_claw.getStatorCurrent().getValueAsDouble();
-        // System.out.println("INTAKE CURRENT: " + intakecur);
+        System.out.println("INTAKE CURRENT: " + clawCurrent);
+        SmartDashboard.putNumber("Intake current", clawCurrent);
         if (clawCurrent > 110){
             return true;
         }
