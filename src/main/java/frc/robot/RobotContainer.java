@@ -34,6 +34,9 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.lights.Colors;
+import frc.robot.subsystems.lights.Lights;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -46,6 +49,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Climber climb;
+
+  private final Lights lights = new Lights(0);;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
