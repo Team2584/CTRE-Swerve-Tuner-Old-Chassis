@@ -28,6 +28,15 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
+
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -46,6 +55,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Climber climb;
+  private final Intake intake;
+  private final Elevator elevator;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -69,6 +80,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
         climb = new Climber(new ClimberIOTalonFX());
+        intake = new Intake(new IntakeIOTalonFX());
+        elevator = new Elevator(new ElevatorIOTalonFX());
         
         break;
 
@@ -84,6 +97,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
 
         climb = new Climber(new ClimberIOSim());
+        intake = new Intake(new IntakeIOSim());
+        elevator = new Elevator(new ElevatorIOSim());
         break;
 
       default:
@@ -97,6 +112,8 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         climb = new Climber(new ClimberIO() {});
+        intake = new Intake(new IntakeIO() {});
+        elevator = new Elevator(new ElevatorIO() {});
         break;
     }
 
@@ -151,9 +168,12 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
+    // Climb command triggers
     controller.rightTrigger().whileTrue(climb.runPercent(100));
     controller.leftTrigger().whileTrue(climb.runPercent(-1*100));
 
+    controller.rightBumper().whileTrue(intake.outtakeCommand(30));
+    controller.leftBumper().whileTrue(intake.intakeCommand(30));
     // Reset gyro to 0° when B button is pressed
     controller
         .b()
