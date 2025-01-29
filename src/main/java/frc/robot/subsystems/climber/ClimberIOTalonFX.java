@@ -81,10 +81,10 @@ public class ClimberIOTalonFX implements ClimberIO {
         leftCurrent
         );
 
-    inputs.leftPositionRad = Units.rotationsToRadians(leftPosition.getValueAsDouble());
-    inputs.leftVelocityRadPerSec = Units.rotationsToRadians(leftVelocity.getValueAsDouble());
-    inputs.leftAppliedVolts = leftAppliedVolts.getValueAsDouble();
-    inputs.leftCurrentAmps = leftCurrent.getValueAsDouble();
+    inputs.positionRad = Units.rotationsToRadians(leftPosition.getValueAsDouble());
+    inputs.velocityRadPerSec = Units.rotationsToRadians(leftVelocity.getValueAsDouble());
+    inputs.appliedVolts = leftAppliedVolts.getValueAsDouble();
+    inputs.currentAmps = leftCurrent.getValueAsDouble();
 
   }
 

@@ -20,10 +20,10 @@ public class ClimberIOSim implements ClimberIO {
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
 
-    inputs.leftPositionRad = sim.getAngularPositionRad();
-    inputs.leftVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
-    inputs.leftAppliedVolts = appliedVolts;
-    inputs.leftCurrentAmps = sim.getCurrentDrawAmps();
+    inputs.positionRad = sim.getAngularPositionRad();
+    inputs.velocityRadPerSec = sim.getAngularVelocityRadPerSec();
+    inputs.appliedVolts = appliedVolts;
+    inputs.currentAmps = sim.getCurrentDrawAmps();
   }
 
   @Override

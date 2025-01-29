@@ -28,12 +28,12 @@ public class Climber extends SubsystemBase {
       "Climber/climbPose",
       new Pose3d[] {
         new Pose3d(
-          -0.05, 0.0, 0.1, new Rotation3d(0.0, -inputs.leftPositionRad-0.55, 0.0)
+          0.05, 0.0, 0.1, new Rotation3d(0.0, -inputs.positionRad-0.55, 0.0)
         )
       });
   
   }
-
+//-inputs.positionRad-0.55
   public Command runPercent(double percent) {
     return runEnd(() -> io.setVoltage(percent * 12.0), () -> io.setVoltage(0.0));
   }

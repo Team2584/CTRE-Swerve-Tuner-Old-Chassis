@@ -75,12 +75,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     slot0.kS = 0.25; // Static friction compensation
     config.Slot0 = slot0;
 
-
-    // Apply configs to both motors
-    tryUntilOk(5, () -> m_leftElevator.getConfigurator().apply(config, 0.25));
     
-    
-    // Invert the right side and apply the same config
 
     // Set up signal monitoring
     BaseStatusSignal.setUpdateFrequencyForAll(
