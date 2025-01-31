@@ -19,101 +19,204 @@ import static frc.robot.util.PhoenixUtil.*;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.OpenLoopRampsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.commons.TunableDashboardNumber;
 
-/**
- * This roller implementation is for a Talon FX driving a motor like the Falon 500 or Kraken X60.
- */
 public class ElevatorIOTalonFX implements ElevatorIO {
-  private final TalonFX m_leftElevator = new TalonFX(leftElevatorCanId);
-  private final TalonFX m_rightElevator = new TalonFX(leftElevatorCanId);
 
-  // Motion Magic control request
-  private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0.0);
+  /* Hardware */
+  private final TalonFX leader;
+  private final TalonFX follower;
 
-  private final VoltageOut voltageRequest = new VoltageOut(0.0);
+  /* Configurators */
+  private TalonFXConfigurator leaderConfigurator;
+  private TalonFXConfigurator followerConfigurator;
 
-  // Status signals
-  private final StatusSignal<Angle> position = m_leftElevator.getPosition();
-  private final StatusSignal<AngularVelocity> velocity = m_leftElevator.getVelocity();
-  private final StatusSignal<Voltage> appliedVolts = m_leftElevator.getMotorVoltage();
-  private final StatusSignal<Current> current = m_leftElevator.getSupplyCurrent();
+  /* Configs */
+  private final CurrentLimitsConfigs currentLimitsConfigs;
+  private final MotorOutputConfigs leaderMotorConfigs;
+  private final MotorOutputConfigs followerMotorConfigs;
+  private final Slot0Configs slot0Configs;
+  private final MotionMagicConfigs motionMagicConfigs;
+  private double setpoint;
+
+  /* Gains */
+  TunableDashboardNumber kS = new TunableDashboardNumber("Elevator/kS", 0.25);
+  TunableDashboardNumber kG = new TunableDashboardNumber("Elevator/kA", 0.12);
+  TunableDashboardNumber kV = new TunableDashboardNumber("Elevator/kV", 0.12);
+  TunableDashboardNumber kP = new TunableDashboardNumber("Elevator/kP", 10.0);
+  TunableDashboardNumber kI = new TunableDashboardNumber("Elevator/kI", 0.0);
+  TunableDashboardNumber kD = new TunableDashboardNumber("Elevator/kD", 0.5);
+
+  TunableDashboardNumber motionAcceleration = new TunableDashboardNumber("Elevator/MotionAcceleration", 10);
+  TunableDashboardNumber motionCruiseVelocity = new TunableDashboardNumber("Elevator/MotionCruiseVelocity", 0.5);
+  TunableDashboardNumber motionJerk = new TunableDashboardNumber("Elevator/MotionJerk", 50);
+
+  /* Status Signals */
+  private StatusSignal<Current> supplyLeft;
+  private StatusSignal<Current> supplyRight;
+  private StatusSignal<Double> closedLoopReferenceSlope;
+  double prevClosedLoopReferenceSlope = 0.0;
+  double prevReferenceSlopeTimestamp = 0.0;
 
   public ElevatorIOTalonFX() {
-    var config = new TalonFXConfiguration();
+    /* Instantiate motors and configurators */
+    this.leader = new TalonFX(ELEVATOR_LEFT_ID);
+    this.follower = new TalonFX(ELEVATOR_RIGHT_ID);
 
-    FeedbackConfigs fdb = config.Feedback;
-    
-    // Configure current limits
-    config.CurrentLimits.SupplyCurrentLimit = currentLimit;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    this.leaderConfigurator = leader.getConfigurator();
+    this.followerConfigurator = follower.getConfigurator();
 
-    // Motion Magic configs
-    config.MotionMagic.MotionMagicCruiseVelocity = 0.5; // Rotations per second
-    config.MotionMagic.MotionMagicAcceleration = 10; // Rotations per second squared
-    config.MotionMagic.MotionMagicJerk = 50; // Rotations per second cubed
+    /* Create Configs */
+    currentLimitsConfigs = new CurrentLimitsConfigs();
+    currentLimitsConfigs.StatorCurrentLimitEnable = true;
+    currentLimitsConfigs.StatorCurrentLimit = 120.0;
+    currentLimitsConfigs.SupplyCurrentLimit = 120;
 
-    // Configure Motion Magic and PID gains
-    var slot0 = new Slot0Configs();
-    slot0.kP = 60; // Adjust based on your elevator's needs
-    slot0.kI = 0;
-    slot0.kD = 0.5;
-    slot0.kV = 0.12; // Roughly 1.2V per RPS
-    slot0.kS = 0.25; // Static friction compensation
-    config.Slot0 = slot0;
+    leaderMotorConfigs = new MotorOutputConfigs();
+    leaderMotorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
+    leaderMotorConfigs.NeutralMode = NeutralModeValue.Brake;
 
-    
+    followerMotorConfigs = new MotorOutputConfigs();
+    followerMotorConfigs.NeutralMode = NeutralModeValue.Brake;
+
+    slot0Configs = new Slot0Configs(); //PID Gains
+    slot0Configs.kP = kP.get(); // Adjust based on your elevator's needs
+    slot0Configs.kI = kI.get();
+    slot0Configs.kD = kD.get();
+    slot0Configs.kV = kV.get(); // Roughly 1.2V per RPS
+    slot0Configs.kG = kG.get(); // Adds constant value to hold elevator up
+    slot0Configs.kS = kS.get(); // Static friction compensation
+
+    motionMagicConfigs = new MotionMagicConfigs();
+    motionMagicConfigs.MotionMagicAcceleration = motionAcceleration.get(); // Rotations per second squared
+    motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get();// Rotations per second
+    motionMagicConfigs.MotionMagicJerk = motionJerk.get(); // Rotations per second cubed
+
+    /* Apply Configs */
+    leaderConfigurator.apply(currentLimitsConfigs);
+    leaderConfigurator.apply(leaderMotorConfigs);
+    leaderConfigurator.apply(slot0Configs);
+    leaderConfigurator.apply(motionMagicConfigs);
+
+    followerConfigurator.apply(currentLimitsConfigs);
+    followerConfigurator.apply(followerMotorConfigs);
+    followerConfigurator.apply(slot0Configs);
+    followerConfigurator.apply(motionMagicConfigs);
 
     // Set up signal monitoring
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0,
-        position,
-        velocity,
-        appliedVolts,
-        current
-        );
-    m_leftElevator.optimizeBusUtilization();
+    supplyLeft = leader.getSupplyCurrent();
+    supplyRight = follower.getSupplyCurrent();
+    closedLoopReferenceSlope = leader.getClosedLoopReferenceSlope();
 
-    // Zero the encoder positions
-    m_leftElevator.setPosition(0.0);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100, supplyLeft, supplyRight, closedLoopReferenceSlope);
+
+    follower.setControl(new Follower(ELEVATOR_LEFT_ID, false));
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-      position,
-      velocity,
-      appliedVolts,
-      current
-        );
+    BaseStatusSignal.refreshAll(supplyLeft, supplyRight, closedLoopReferenceSlope);
 
-    inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());
-    inputs.velocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
-    inputs.appliedVolts = appliedVolts.getValueAsDouble();
-    inputs.currentAmps = current.getValueAsDouble();
+    inputs.posInches = getHeight();
+    inputs.velMetersPerSecond = getVelocity();
+    inputs.motionMagicVelocityTarget = rotationsToInches(leader.getClosedLoopReferenceSlope().getValue());
+    inputs.motionMagicPositionTarget = rotationsToInches(leader.getClosedLoopReference().getValue());
+    inputs.appliedVoltage = leader.getMotorVoltage().getValueAsDouble();
+    inputs.supplyCurrent = new double[] {supplyLeft.getValueAsDouble(), supplyRight.getValueAsDouble()};
+    inputs.statorCurrent = new double[] {leader.getStatorCurrent().getValueAsDouble(), follower.getStatorCurrent().getValueAsDouble()};
+    inputs.setpointInches = setpoint;
+
+    double currentTime = closedLoopReferenceSlope.getTimestamp().getTime();
+    if (currentTime - prevReferenceSlopeTimestamp > 0.0) {
+      inputs.acceleration =
+          (inputs.motionMagicVelocityTarget - prevClosedLoopReferenceSlope)
+              / (currentTime - prevReferenceSlopeTimestamp);
+    }
+
+    prevClosedLoopReferenceSlope = inputs.motionMagicVelocityTarget;
+    prevReferenceSlopeTimestamp = currentTime;
+  }
+
+  @Override
+  public void setHeight(double heightInches) {
+    if (!DriverStation.isEnabled()) {
+      return;
+    }
+    setpoint = heightInches;
+    leader.setControl(new MotionMagicVoltage(inchesToRotations(heightInches)));
   }
 
   @Override
   public void setVoltage(double volts) {
-    m_leftElevator.setControl(voltageRequest.withOutput(volts));
+    leader.setControl(new VoltageOut(volts));
   }
 
-  // New method for position control using Motion Magic
-  public void setPosition(double positionRotations) {
-    m_leftElevator.setControl(motionMagicRequest.withPosition(positionRotations));
-    //m_rightElevator.setControl(motionMagicRequest.withPosition(-positionRotations));
+  @Override
+  public void resetHeight(double newHeightInches) {
+    leader.setPosition(inchesToRotations(newHeightInches));
+  }
+
+  @Override
+  public void updateTunableNumbers() {
+    if (kS.hasChanged(0)
+        || kG.hasChanged(0)
+        || kV.hasChanged(0)
+        || kP.hasChanged(0)
+        || kI.hasChanged(0)
+        || kD.hasChanged(0)
+        || motionAcceleration.hasChanged(0)
+        || motionCruiseVelocity.hasChanged(0)) {
+      slot0Configs.kS = kS.get();
+      slot0Configs.kG = kG.get();
+      slot0Configs.kV = kV.get();
+      slot0Configs.kP = kP.get();
+      slot0Configs.kI = kI.get();
+      slot0Configs.kD = kD.get();
+
+      motionMagicConfigs.MotionMagicAcceleration = motionAcceleration.get();
+      motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get();
+
+      leaderConfigurator.apply(slot0Configs);
+      followerConfigurator.apply(slot0Configs);
+      leaderConfigurator.apply(motionMagicConfigs);
+      followerConfigurator.apply(motionMagicConfigs);
+    }
+  }
+
+  private double getHeight() {
+    return rotationsToInches(leader.getPosition().getValueAsDouble());
+  }
+
+  private double getVelocity() {
+    return rotationsToInches(leader.getVelocity().getValueAsDouble());
+  }
+
+  private double inchesToRotations(double heightInches) {
+    return (heightInches / (Math.PI * ELEVATOR_PULLEY_PITCH_DIAMETER)) * ELEVATOR_GEAR_RATIO;
+}
+
+  private double rotationsToInches(double rotations) {
+    return rotations * (Math.PI * ELEVATOR_PULLEY_PITCH_DIAMETER) / ELEVATOR_GEAR_RATIO;
   }
 }

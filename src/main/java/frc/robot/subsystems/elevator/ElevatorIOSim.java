@@ -1,6 +1,6 @@
 package frc.robot.subsystems.elevator;
 
-import static frc.robot.subsystems.climber.ClimberConstants.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ElevatorIOSim implements ElevatorIO {
   private DCMotorSim sim =
       new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(DCMotor.getCIM(1), 0.004, motorReduction),
+          LinearSystemId.createDCMotorSystem(DCMotor.getCIM(1), 0.004, ELEVATOR_GEAR_RATIO),
           DCMotor.getCIM(1));
 
   private double appliedVolts = 0.0;
@@ -20,10 +20,9 @@ public class ElevatorIOSim implements ElevatorIO {
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
 
-    inputs.positionRad = sim.getAngularPositionRad();
-    inputs.velocityRadPerSec = sim.getAngularVelocityRadPerSec();
-    inputs.appliedVolts = appliedVolts;
-    inputs.currentAmps = sim.getCurrentDrawAmps();
+    inputs.posInches = sim.getAngularPositionRad();
+    inputs.velMetersPerSecond = sim.getAngularVelocityRadPerSec();
+    inputs.appliedVoltage = appliedVolts;
   }
 
   @Override
