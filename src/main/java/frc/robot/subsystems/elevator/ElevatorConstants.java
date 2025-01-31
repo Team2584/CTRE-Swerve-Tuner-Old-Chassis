@@ -13,9 +13,9 @@ public class ElevatorConstants {
 
 
   /* Physical Measurements */
-  public static final double ELEVATOR_MIN_HEIGHT = 1; // TUNE ME
-  public static final double ELEVATOR_MAX_HEIGHT = 35; // TUNE ME
+  public static final double ELEVATOR_MIN_HEIGHT = 0;
+  public static final double ELEVATOR_MAX_HEIGHT = 50; // TUNE ME
   public static final double ELEVATOR_PULLEY_PITCH_DIAMETER  = 1.504;
-  public static final double ELEVATOR_GEAR_RATIO = 8.571; //TUNE ME
+  public static final double ELEVATOR_GEAR_RATIO = 8.571;
 
 }

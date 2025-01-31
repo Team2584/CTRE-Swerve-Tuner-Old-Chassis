@@ -60,10 +60,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   private double setpoint;
 
   /* Gains */
-  TunableDashboardNumber kS = new TunableDashboardNumber("Elevator/kS", 0.4);
-  TunableDashboardNumber kG = new TunableDashboardNumber("Elevator/kA", 0.3);
-  TunableDashboardNumber kV = new TunableDashboardNumber("Elevator/kV", 0.3);
-  TunableDashboardNumber kP = new TunableDashboardNumber("Elevator/kP", 10.0);
+  TunableDashboardNumber kS = new TunableDashboardNumber("Elevator/kS", 0);
+  TunableDashboardNumber kG = new TunableDashboardNumber("Elevator/kA", 0);
+  TunableDashboardNumber kV = new TunableDashboardNumber("Elevator/kV", 0);
+  TunableDashboardNumber kP = new TunableDashboardNumber("Elevator/kP", 1.0);
   TunableDashboardNumber kI = new TunableDashboardNumber("Elevator/kI", 0.0);
   TunableDashboardNumber kD = new TunableDashboardNumber("Elevator/kD", 0.5);
 
@@ -131,7 +131,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         100, supplyLeft, supplyRight, closedLoopReferenceSlope);
 
-    follower.setControl(new Follower(ELEVATOR_LEFT_ID, true));
+    follower.setControl(new Follower(ELEVATOR_LEFT_ID, false));
   }
 
   @Override
