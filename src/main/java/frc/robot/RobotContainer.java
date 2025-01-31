@@ -174,6 +174,11 @@ public class RobotContainer {
 
     controller.rightBumper().whileTrue(intake.outtakeCommand(30));
     controller.leftBumper().whileTrue(intake.intakeCommand(30));
+
+    // Elevator command triggers
+    controller.y().onTrue(elevator.moveTo(20));
+    controller.x().onTrue(elevator.moveTo(10));
+
     // Reset gyro to 0° when B button is pressed
     controller
         .b()
