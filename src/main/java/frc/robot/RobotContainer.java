@@ -179,7 +179,12 @@ public class RobotContainer {
 
     // Elevator command triggers
     controller.y().onTrue(elevator.moveTo(20));
-    controller.x().whileTrue(elevator.runPercent(0.8))
+    controller.x().onTrue(elevator.moveTo(0));
+
+    controller.povUp().whileTrue(elevator.runPercent(0.8))
+                .onFalse(elevator.runPercent(0.0));
+
+    controller.povDown().whileTrue(elevator.runPercent(-0.8))
                 .onFalse(elevator.runPercent(0.0));
 
     // Reset gyro to 0° when B button is pressed

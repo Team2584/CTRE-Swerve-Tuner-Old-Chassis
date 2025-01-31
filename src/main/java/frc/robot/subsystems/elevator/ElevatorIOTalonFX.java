@@ -48,8 +48,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   private final TalonFX follower;
 
   /* Configurators */
-  private TalonFXConfigurator leaderConfigurator;
-  private TalonFXConfigurator followerConfigurator;
+  private TalonFXConfiguration leaderConfiguration;
 
   /* Configs */
   private final CurrentLimitsConfigs currentLimitsConfigs;
@@ -83,14 +82,16 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     this.leader = new TalonFX(ELEVATOR_LEFT_ID);
     this.follower = new TalonFX(ELEVATOR_RIGHT_ID);
 
-    this.leaderConfigurator = leader.getConfigurator();
-    this.followerConfigurator = follower.getConfigurator();
+    this.leaderConfiguration = new TalonFXConfiguration();
+
+    this.leader.setPosition(0);
 
     /* Create Configs */
     currentLimitsConfigs = new CurrentLimitsConfigs();
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     currentLimitsConfigs.StatorCurrentLimit = 120.0;
     currentLimitsConfigs.SupplyCurrentLimit = 120;
+
 
     leaderMotorConfigs = new MotorOutputConfigs();
     leaderMotorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -99,7 +100,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     followerMotorConfigs = new MotorOutputConfigs();
     followerMotorConfigs.NeutralMode = NeutralModeValue.Brake;
 
-    slot0Configs = new Slot0Configs(); //PID Gains
+
+    slot0Configs = leaderConfiguration.Slot0; //PID Gains
     slot0Configs.kP = kP.get(); // Adjust based on your elevator's needs
     slot0Configs.kI = kI.get();
     slot0Configs.kD = kD.get();
@@ -107,21 +109,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     slot0Configs.kG = kG.get(); // Adds constant value to hold elevator up
     slot0Configs.kS = kS.get(); // Static friction compensation
 
-    motionMagicConfigs = new MotionMagicConfigs();
+    motionMagicConfigs = leaderConfiguration.MotionMagic;
     motionMagicConfigs.MotionMagicAcceleration = motionAcceleration.get(); // Rotations per second squared
     motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get();// Rotations per second
     motionMagicConfigs.MotionMagicJerk = motionJerk.get(); // Rotations per second cubed
 
     /* Apply Configs */
-    leaderConfigurator.apply(currentLimitsConfigs);
-    leaderConfigurator.apply(leaderMotorConfigs);
-    leaderConfigurator.apply(slot0Configs);
-    leaderConfigurator.apply(motionMagicConfigs);
+    leader.getConfigurator().apply(leaderConfiguration);
 
-    followerConfigurator.apply(currentLimitsConfigs);
-    followerConfigurator.apply(followerMotorConfigs);
-    followerConfigurator.apply(slot0Configs);
-    followerConfigurator.apply(motionMagicConfigs);
 
     // Set up signal monitoring
     supplyLeft = leader.getSupplyCurrent();
@@ -197,10 +192,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
       motionMagicConfigs.MotionMagicAcceleration = motionAcceleration.get();
       motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get();
 
-      leaderConfigurator.apply(slot0Configs);
-      followerConfigurator.apply(slot0Configs);
-      leaderConfigurator.apply(motionMagicConfigs);
-      followerConfigurator.apply(motionMagicConfigs);
+      leader.getConfigurator().apply(leaderConfiguration);
     }
   }
 
