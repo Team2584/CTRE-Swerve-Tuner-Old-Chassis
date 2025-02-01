@@ -64,6 +64,9 @@ public class Elevator extends SubsystemBase{
 
   
   }
+  public Command resetHeight(){
+    return runOnce(()-> io.resetHeight(0));
+  }
 
   public Command moveTo(double setpoint){
     return runOnce(()-> io.setHeight(setpoint));
