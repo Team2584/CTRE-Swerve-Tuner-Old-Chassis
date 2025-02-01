@@ -62,7 +62,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
   /* Tunable Gains */
   TunableDashboardNumber kS = new TunableDashboardNumber("Elevator/kS", 0.235);
-  TunableDashboardNumber kG = new TunableDashboardNumber("Elevator/kG", 0.18);
+  TunableDashboardNumber kG = new TunableDashboardNumber("Elevator/kG", 0.0);
   TunableDashboardNumber kA = new TunableDashboardNumber("Elevator/kA", 0.01);
   TunableDashboardNumber kV = new TunableDashboardNumber("Elevator/kV", 0.11);
   TunableDashboardNumber kP = new TunableDashboardNumber("Elevator/kP", 8.5);
