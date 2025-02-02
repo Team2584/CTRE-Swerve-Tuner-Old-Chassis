@@ -23,11 +23,6 @@ public class Elevator extends SubsystemBase{
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
-  final double FIRST_STAGE_MIN_HEIGHT = 0;
-  final double FIRST_STAGE_MAX_HEIGHT = 28.625*0.0254;
-  final double SECOND_STAGE_MIN_HEIGHT = 0;
-  final double SECOND_STAGE_MAX_HEIGHT = 53.375*0.0254;
-
 
   public Elevator(ElevatorIO io) {
     this.io = io;
@@ -83,6 +78,7 @@ public class Elevator extends SubsystemBase{
   public Command runPercent(double percent) {
     return runEnd(() -> io.setVoltage(percent * 12.0), () -> io.setVoltage(0.0));
   }
+
 
   
 }

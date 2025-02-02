@@ -18,27 +18,25 @@ public interface ElevatorIO {
   }
 
   /* Updates the set of loggable inputs */
-  public default void updateInputs(ElevatorIOInputs inputs) {
-  }
+  public default void updateInputs(ElevatorIOInputs inputs) {}
 
   /* Sets the elevator to a height setpoint via motion magic */
-  public default void setHeight(double heightInches) {
-  }
+  public default void setHeight(double heightInches) {}
 
   /** Sets the climber to a specified voltage output */
-  public default void setVoltage(double volts) {
-  }
+  public default void setVoltage(double volts) {}
 
   /** Resets the encoder reading of the elevator to a specified position */
-  public default void resetHeight(double newHeightInches) {
-  }
+  public default void resetHeight(double newHeightInches) {}
 
   /* Sets the elevators's neutral mode */
-  public default void enableBrakeMode(boolean enable) {
-  }
+  public default void enableBrakeMode(boolean enable) {}
 
   /* Updates tunable numbers if neccesary */
-  public default void updateTunableNumbers() {
-  }
+  public default void updateTunableNumbers() {}
+
+  /** Run music on drive motors for the funny
+   *0=Stop, 1=Play, 2=Pause*/
+  public default void musicState(String chrpFile) {} //
 
 }

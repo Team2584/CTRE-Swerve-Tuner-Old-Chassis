@@ -16,6 +16,8 @@ package frc.robot.subsystems.elevator;
 import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 import static frc.robot.util.PhoenixUtil.*;
 
+import org.ejml.dense.block.MatrixOps_DDRB;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -122,12 +124,13 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // Set up signal monitoring
     supplyLeft = leader.getSupplyCurrent();
     supplyRight = follower.getSupplyCurrent();
-    closedLoopReferenceSlope = leader.getClosedLoopReferenceSlope();
+    closedLoopReferenceSlope= leader.getClosedLoopReferenceSlope();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         100, supplyLeft, supplyRight, closedLoopReferenceSlope);
 
     follower.setControl(new Follower(ELEVATOR_LEFT_ID, false));
+
   }
 
   @Override
@@ -214,4 +217,5 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   private double rotationsToInches(double rotations) {
     return rotations * (Math.PI * ELEVATOR_PULLEY_PITCH_DIAMETER);
   }
+  
 }

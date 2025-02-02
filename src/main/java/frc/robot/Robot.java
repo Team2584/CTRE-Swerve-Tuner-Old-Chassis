@@ -43,6 +43,7 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   public Robot() {
+    
 
     Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
 

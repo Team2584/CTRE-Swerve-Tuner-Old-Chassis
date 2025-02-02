@@ -15,6 +15,8 @@ package frc.robot;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
@@ -39,10 +42,12 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
@@ -59,6 +64,11 @@ public class RobotContainer {
   private final Climber climb;
   private final Intake intake;
   private final Elevator elevator;
+  
+  //Motor Music for funsies
+  Orchestra all_orchestra = new Orchestra(); //Make and orchestra!
+  boolean isPlaying = false;
+
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -68,7 +78,25 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    
+
+    // Add all motors to your orchestm_orchestra.addInstrument(leader); //Add instrument to your music orchestra
+    all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_LEFT_ID),0);
+    all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_RIGHT_ID),0);
+    all_orchestra.addInstrument(new TalonFX(ClimberConstants.leftClimberCanId),0);
+    all_orchestra.addInstrument(new TalonFX(ClimberConstants.rightClimberCanId),0);
+    all_orchestra.addInstrument(new TalonFX(IntakeConstants.INTAKE_ID),0);
+    all_orchestra.addInstrument(new TalonFX(IntakeConstants.WRIST_ID),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.DriveMotorId),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.SteerMotorId),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.DriveMotorId),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.SteerMotorId),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.DriveMotorId),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.SteerMotorId),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.DriveMotorId),0);
+    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.SteerMotorId),0);
+
+
+
 
     switch (Constants.currentMode) {
       case REAL:
@@ -158,37 +186,43 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
+    // controller
+    //     .a()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> new Rotation2d()));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    //controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Climb command triggers
-    controller.rightTrigger().whileTrue(climb.runPercent(100));
-    controller.leftTrigger().whileTrue(climb.runPercent(-1*100));
+    controller.rightBumper().onTrue(elevator.moveTo(40));
+    controller.leftBumper().onTrue(elevator.moveTo(0));
 
-    controller.rightBumper().whileTrue(intake.outtakeCommand(30));
-    controller.leftBumper().whileTrue(intake.intakeCommand(30));
+    controller.rightTrigger().whileTrue(intake.outtakeCommand(30));
+    controller.leftTrigger().whileTrue(intake.intakeCommand(30));
 
     // Elevator command triggers
-    controller.y().onTrue(elevator.moveTo(35));
-    controller.x().onTrue(elevator.moveTo(0));
+    controller.y().whileTrue(intake.moveWrist(10));
+    controller.a().whileTrue(intake.moveWrist(-10));
+    controller.x().whileTrue(climb.runPercent(50));
+    controller.b().whileTrue(climb.runPercent(-50));
+    
 
-    controller.povUp().whileTrue(elevator.runPercent(0.1))
+    controller.povUp().whileTrue(elevator.runPercent(0.1))//make button
                 .onFalse(elevator.runPercent(0.0));
 
-    controller.povDown().whileTrue(elevator.runPercent(-0.1))
+    controller.povDown().whileTrue(elevator.runPercent(-0.1))//make button
                 .onFalse(elevator.runPercent(0.0));
 
-    controller.povRight().whileTrue(elevator.resetHeight())
-                .onFalse(elevator.runPercent(0.0));
+    controller.povRight().whileTrue(elevator.resetHeight());
+                
+
+
+    // controller.povUp().onTrue(playMusicAll("Megalovania.chrp")); // make button
 
     // Reset gyro to 0° when B button is pressed
     controller
@@ -209,5 +243,17 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public Command playMusicAll(String fileNeame){
+    all_orchestra.loadMusic(fileNeame);
+    if (isPlaying) {
+      isPlaying = true;
+     return Commands.runOnce(() -> all_orchestra.play());
+    } 
+    else {
+      isPlaying = false;
+     return Commands.runOnce(() -> all_orchestra.stop());
+    }
   }
 }
