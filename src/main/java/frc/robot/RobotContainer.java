@@ -80,8 +80,8 @@ public class RobotContainer {
   public RobotContainer() {
 
     // Add all motors to your orchestm_orchestra.addInstrument(leader); //Add instrument to your music orchestra
-    all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_LEFT_ID),0);
-    all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_RIGHT_ID),0);
+    //all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_LEFT_ID),0);
+    //all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_RIGHT_ID),0);
     all_orchestra.addInstrument(new TalonFX(ClimberConstants.leftClimberCanId),0);
     all_orchestra.addInstrument(new TalonFX(ClimberConstants.rightClimberCanId),0);
     all_orchestra.addInstrument(new TalonFX(IntakeConstants.INTAKE_ID),0);
@@ -222,7 +222,7 @@ public class RobotContainer {
                 
 
 
-    // controller.povUp().onTrue(playMusicAll("Megalovania.chrp")); // make button
+    controller.povLeft().onTrue(playMusicAll("WD.chrp")); // make button
 
     // Reset gyro to 0° when B button is pressed
     controller
