@@ -66,15 +66,15 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   TunableDashboardNumber kS = new TunableDashboardNumber("Elevator/kS", 0.235);
   TunableDashboardNumber kG = new TunableDashboardNumber("Elevator/kG", 0.0);
   TunableDashboardNumber kA = new TunableDashboardNumber("Elevator/kA", 0.01);
-  TunableDashboardNumber kV = new TunableDashboardNumber("Elevator/kV", 0.11);
-  TunableDashboardNumber kP = new TunableDashboardNumber("Elevator/kP", 8.5);
+  TunableDashboardNumber kV = new TunableDashboardNumber("Elevator/kV", 0.3);
+  TunableDashboardNumber kP = new TunableDashboardNumber("Elevator/kP", 12);
   TunableDashboardNumber kI = new TunableDashboardNumber("Elevator/kI", 0.0);
   TunableDashboardNumber kD = new TunableDashboardNumber("Elevator/kD", 0.01);
 
   TunableDashboardNumber motionCruiseVelocity = new TunableDashboardNumber("Elevator/MotionCruiseVelocity", 0);
 
   TunableDashboardNumber mm_kA = new TunableDashboardNumber("Elevator/MM_KA", 0.02);
-  TunableDashboardNumber mm_kV = new TunableDashboardNumber("Elevator/MM_KV", 0.11);
+  TunableDashboardNumber mm_kV = new TunableDashboardNumber("Elevator/MM_KV", 0.3);
 
   /* Status Signals */
   private StatusSignal<Current> supplyLeft;

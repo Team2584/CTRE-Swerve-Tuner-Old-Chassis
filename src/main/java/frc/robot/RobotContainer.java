@@ -82,10 +82,10 @@ public class RobotContainer {
     // Add all motors to your orchestm_orchestra.addInstrument(leader); //Add instrument to your music orchestra
     //all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_LEFT_ID),0);
     //all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_RIGHT_ID),0);
-    all_orchestra.addInstrument(new TalonFX(ClimberConstants.leftClimberCanId),0);
-    all_orchestra.addInstrument(new TalonFX(ClimberConstants.rightClimberCanId),0);
-    all_orchestra.addInstrument(new TalonFX(IntakeConstants.INTAKE_ID),0);
-    all_orchestra.addInstrument(new TalonFX(IntakeConstants.WRIST_ID),0);
+    //all_orchestra.addInstrument(new TalonFX(ClimberConstants.leftClimberCanId),0);
+    //all_orchestra.addInstrument(new TalonFX(ClimberConstants.rightClimberCanId),0);
+    //all_orchestra.addInstrument(new TalonFX(IntakeConstants.INTAKE_ID),0);
+    //all_orchestra.addInstrument(new TalonFX(IntakeConstants.WRIST_ID),0);
     all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.DriveMotorId),0);
     all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.SteerMotorId),0);
     all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.DriveMotorId),0);
@@ -199,7 +199,7 @@ public class RobotContainer {
     //controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Climb command triggers
-    controller.rightBumper().onTrue(elevator.moveTo(40));
+    controller.rightBumper().onTrue(elevator.moveTo(54));
     controller.leftBumper().onTrue(elevator.moveTo(0));
 
     controller.rightTrigger().whileTrue(intake.outtakeCommand(30));
@@ -222,7 +222,7 @@ public class RobotContainer {
                 
 
 
-    controller.povLeft().onTrue(playMusicAll("WD.chrp")); // make button
+    controller.povLeft().onTrue(playMusicAll("WDSTF.chrp")); // make button
 
     // Reset gyro to 0° when B button is pressed
     controller
@@ -247,13 +247,7 @@ public class RobotContainer {
 
   public Command playMusicAll(String fileNeame){
     all_orchestra.loadMusic(fileNeame);
-    if (isPlaying) {
-      isPlaying = true;
      return Commands.runOnce(() -> all_orchestra.play());
     } 
-    else {
-      isPlaying = false;
-     return Commands.runOnce(() -> all_orchestra.stop());
-    }
-  }
+  
 }
