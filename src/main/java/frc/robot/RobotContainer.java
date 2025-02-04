@@ -86,14 +86,14 @@ public class RobotContainer {
     //all_orchestra.addInstrument(new TalonFX(ClimberConstants.rightClimberCanId),0);
     //all_orchestra.addInstrument(new TalonFX(IntakeConstants.INTAKE_ID),0);
     //all_orchestra.addInstrument(new TalonFX(IntakeConstants.WRIST_ID),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.DriveMotorId),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.SteerMotorId),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.DriveMotorId),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.SteerMotorId),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.DriveMotorId),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.SteerMotorId),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.DriveMotorId),0);
-    all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.SteerMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.DriveMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.SteerMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.DriveMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.SteerMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.DriveMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.SteerMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.DriveMotorId),0);
+    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.SteerMotorId),0);
 
 
 
@@ -222,7 +222,7 @@ public class RobotContainer {
                 
 
 
-    controller.povLeft().onTrue(playMusicAll("WDSTF.chrp")); // make button
+    // controller.povLeft().onTrue(playMusicAll("Undertale.chrp")); // make button
 
     // Reset gyro to 0° when B button is pressed
     controller
