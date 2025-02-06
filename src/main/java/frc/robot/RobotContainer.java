@@ -51,6 +51,10 @@ import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -64,11 +68,7 @@ public class RobotContainer {
   private final Climber climb;
   private final Intake intake;
   private final Elevator elevator;
-  
-  //Motor Music for funsies
-  Orchestra all_orchestra = new Orchestra(); //Make and orchestra!
-  boolean isPlaying = false;
-
+  private final Vision vision;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -78,25 +78,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    // Add all motors to your orchestm_orchestra.addInstrument(leader); //Add instrument to your music orchestra
-    //all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_LEFT_ID),0);
-    //all_orchestra.addInstrument(new TalonFX(ElevatorConstants.ELEVATOR_RIGHT_ID),0);
-    //all_orchestra.addInstrument(new TalonFX(ClimberConstants.leftClimberCanId),0);
-    //all_orchestra.addInstrument(new TalonFX(ClimberConstants.rightClimberCanId),0);
-    //all_orchestra.addInstrument(new TalonFX(IntakeConstants.INTAKE_ID),0);
-    //all_orchestra.addInstrument(new TalonFX(IntakeConstants.WRIST_ID),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.DriveMotorId),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackLeft.SteerMotorId),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.DriveMotorId),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.BackRight.SteerMotorId),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.DriveMotorId),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontLeft.SteerMotorId),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.DriveMotorId),0);
-    // all_orchestra.addInstrument(new TalonFX(TunerConstants.FrontRight.SteerMotorId),0);
-
-
-
 
     switch (Constants.currentMode) {
       case REAL:
@@ -112,7 +93,12 @@ public class RobotContainer {
         climb = new Climber(new ClimberIOTalonFX());
         intake = new Intake(new IntakeIOTalonFX());
         elevator = new Elevator(new ElevatorIOTalonFX());
-        
+
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
         break;
 
 
@@ -144,6 +130,7 @@ public class RobotContainer {
         climb = new Climber(new ClimberIO() {});
         intake = new Intake(new IntakeIO() {});
         elevator = new Elevator(new ElevatorIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         break;
     }
 
@@ -244,10 +231,4 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
-
-  public Command playMusicAll(String fileNeame){
-    all_orchestra.loadMusic(fileNeame);
-     return Commands.runOnce(() -> all_orchestra.play());
-    } 
-  
 }
