@@ -28,25 +28,16 @@ public class Elevator extends SubsystemBase{
     this.io = io;
   }
 
+  
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     io.updateTunableNumbers();
     Logger.processInputs("Elevator", inputs);
 
-
-    //double firstStageHeight = Math.max(FIRST_STAGE_MIN_HEIGHT,Math.min(FIRST_STAGE_MAX_HEIGHT,0.68*Math.sin((1/1.6)*Timer.getTimestamp()) + 0.68));
-
-    //double secondStageHeight = Math.max(SECOND_STAGE_MIN_HEIGHT,Math.min(SECOND_STAGE_MAX_HEIGHT,0.68*Math.sin((1/1.6)*Timer.getTimestamp()) + 0.68));
-
-    // double secondStageHeight = totalHeightfromMotor - firstStageHeight;
-
-
     // Log the 3D Translation of the 1st Elevator stage for AdvantageScope
     Logger.recordOutput("Elevator/1st Stage zeroed", new Pose3d[] {new Pose3d()});
     Logger.recordOutput("Elevator/2nd Stage zeroed", new Pose3d[] {new Pose3d()});
-    
-
     
       // Log the 3D Translation of the 2nd Elevator stage for AdvantageScope
       Logger.recordOutput(
@@ -64,6 +55,10 @@ public class Elevator extends SubsystemBase{
   }
 
   public Command moveTo(double setpoint){
+    return runEnd(()-> io.setHeight(setpoint), () -> io.setHeight(0));
+  }
+
+  public Command moveToHold(double setpoint){
     return runOnce(()-> io.setHeight(setpoint));
   }
 

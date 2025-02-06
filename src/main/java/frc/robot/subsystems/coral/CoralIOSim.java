@@ -1,13 +1,13 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.coral;
 
-import static frc.robot.subsystems.intake.IntakeConstants.*;
+import static frc.robot.subsystems.coral.CoralConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class IntakeIOSim implements IntakeIO {
+public class CoralIOSim implements CoralIO {
   private DCMotorSim sim =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getCIM(1), 0.004, 1),
@@ -16,13 +16,12 @@ public class IntakeIOSim implements IntakeIO {
   private double appliedVolts = 0.0;
 
   @Override
-  public void updateInputs(IntakeIOInputs inputs) {
+  public void updateInputs(CoralIOInputs inputs) {
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
 
-    inputs.intakeVelocity = sim.getAngularVelocityRadPerSec();
-    inputs.intakeAppliedVolts = appliedVolts;
-    inputs.intakeCurrentAmps = sim.getCurrentDrawAmps();
+    inputs.coralVelocity = sim.getAngularVelocityRadPerSec();
+    inputs.coralAppliedVolts = appliedVolts;
   }
 
   @Override

@@ -3,7 +3,7 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.climber.ClimberIOInputsAutoLogged;
+import frc.robot.subsystems.intake.IntakeIOInputsAutoLogged;
 
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
 
   private double stallTimerStart = 0;
-  private static final double statorCurrentLimit = 80; // Adjust based on testing
+  private static final double statorCurrentLimit = 120; // Adjust based on testing
   private static final double stallTimer = 0.1; // 100ms, adjust based on testing
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
@@ -40,10 +40,6 @@ public class Intake extends SubsystemBase {
     }
     stallTimerStart = 0;
     return false;
-  }
-
-  public Command moveWrist(double percent){
-    return runEnd(() -> io.moveWrist(percent), () -> io.moveWrist(0));
   }
 
 

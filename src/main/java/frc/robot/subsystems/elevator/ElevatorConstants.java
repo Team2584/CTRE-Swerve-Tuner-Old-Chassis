@@ -3,12 +3,26 @@ package frc.robot.subsystems.elevator;
 /* Constants for Elevator */
 public class ElevatorConstants {
 
-  /* IDs */
+  /* CAN IDs */
   public static final int ELEVATOR_LEFT_ID = 21;
   public static final int ELEVATOR_RIGHT_ID = 20;
 
   /* Elevator Setpoints, Speeds, and Positions  */
-  public static final double ELEVATOR_L1 = 0; //TUNE ME
+
+  public static final double HOME = 0; //TUNE ME
+
+  public static final double INTAKE_CORAL = 0; //TUNE ME
+
+  public static final double L1 = 3.8; //TUNE ME
+  public static final double L2 = 15; //TUNE ME
+  public static final double L3 = 30; //TUNE ME
+  public static final double L4 = 54.5; //TUNE ME
+
+  public static final double GROUND_ALGAE = 0; //TUNE ME
+  public static final double ALGAE_LOW = 0; //TUNE ME
+  public static final double ALGAE_HIGH = 0; //TUNE ME
+
+  public static final double NET = 0;
 
 
 

@@ -11,10 +11,6 @@ public interface IntakeIO {
     public double intakeCurrentAmps = 0.0;
     public double intakeStatorCurrent = 0.0;
 
-    public double wristPosition = 0.0;
-    public double wristVelocity = 0.0;
-    public double wristAppliedVolts = 0.0;
-    public double wristCurrentAmps = 0.0;
   }
    
 
@@ -27,7 +23,4 @@ public interface IntakeIO {
   /** Run intake at specified percentage of max voltage. */  
   public default void moveIntake(double percent){}
 
-  /**Run wrist at specified percentage of max voltage. */ 
-  public default void moveWrist(double percent){}
-  
 }

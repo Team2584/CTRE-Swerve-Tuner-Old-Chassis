@@ -51,6 +51,8 @@ import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import frc.robot.subsystems.coral.*;
+import frc.robot.subsystems.wrist.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -63,11 +65,13 @@ public class RobotContainer {
   private final Drive drive;
   private final Climber climb;
   private final Intake intake;
+  private final Coral coral;
+  private final Wrist wrist;
   private final Elevator elevator;
   
   //Motor Music for funsies
-  Orchestra all_orchestra = new Orchestra(); //Make and orchestra!
-  boolean isPlaying = false;
+  // Orchestra all_orchestra = new Orchestra(); //Make and orchestra!
+  // boolean isPlaying = false;
 
 
   // Controller
@@ -112,6 +116,8 @@ public class RobotContainer {
         climb = new Climber(new ClimberIOTalonFX());
         intake = new Intake(new IntakeIOTalonFX());
         elevator = new Elevator(new ElevatorIOTalonFX());
+        wrist = new Wrist(new WristIOTalonFX());
+        coral = new Coral(new CoralIOTalonFX());
         
         break;
 
@@ -129,6 +135,8 @@ public class RobotContainer {
         climb = new Climber(new ClimberIOSim());
         intake = new Intake(new IntakeIOSim());
         elevator = new Elevator(new ElevatorIOSim());
+        wrist = new Wrist(new WristIOSim());
+        coral = new Coral(new CoralIOSim());
         break;
 
       default:
@@ -144,6 +152,8 @@ public class RobotContainer {
         climb = new Climber(new ClimberIO() {});
         intake = new Intake(new IntakeIO() {});
         elevator = new Elevator(new ElevatorIO() {});
+        wrist = new Wrist(new WristIO() {});
+        coral = new Coral(new CoralIO() {});
         break;
     }
 
@@ -198,42 +208,84 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     //controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Climb command triggers
-    controller.rightBumper().onTrue(elevator.moveTo(54));
-    controller.leftBumper().onTrue(elevator.moveTo(0));
+    // Elevator Scoring Controls for Coral
+    // controller.povUp().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povUp mapped to Top Left paddle
+    // controller.povRight().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povRight mapped to Bottom Left paddle
+    // controller.povDown().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povDown mapped to Top Right paddle
+    // controller.povLeft().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povLeft mapped to Bottom Right paddle
 
-    controller.rightTrigger().whileTrue(intake.outtakeCommand(30));
-    controller.leftTrigger().whileTrue(intake.intakeCommand(30));
+    // controller.rightBumper().whileTrue(elevator.resetHeight()); //Coral Station intake/ Processor
 
-    // Elevator command triggers
-    controller.y().whileTrue(intake.moveWrist(10));
-    controller.a().whileTrue(intake.moveWrist(-10));
-    controller.x().whileTrue(climb.runPercent(50));
-    controller.b().whileTrue(climb.runPercent(-50));
+    // controller.leftTrigger().whileTrue(elevator.resetHeight()); //Algae reef intake
+
+    // controller.rightTrigger().whileTrue(elevator.resetHeight()); // Score Confirm
+
+
+
+
+    // while (controller.rightBumper().getAsBoolean()){
+
+    //   controller.rightBumper().whileTrue(
+    //     DriveCommands.joystickDriveAtAngle(
+    //       drive,
+    //       () -> -controller.getLeftY(),
+    //       () -> -controller.getLeftX(),
+    //       () -> new Rotation2d()));
+
+    
+    //   controller.a().whileTrue(elevator.moveTo(ElevatorConstants.L1));
+    //   controller.b().whileTrue(elevator.moveTo(ElevatorConstants.L2));
+    //   controller.x().whileTrue(elevator.moveTo(ElevatorConstants.L3));
+    //   controller.y().whileTrue(elevator.moveTo(ElevatorConstants.L4));
+
+
+    // }
     
 
-    controller.povUp().whileTrue(elevator.runPercent(0.1))//make button
+    
+    controller.start().whileTrue(coral.moveSpeed(0.375));
+
+    // Elevator command triggers
+    controller.povUp().whileTrue(wrist.moveWrist(-5));
+    controller.povDown().whileTrue(wrist.moveWrist(5));
+    
+    controller.povLeft().whileTrue(climb.runPercent(50));
+    controller.povRight().whileTrue(climb.runPercent(-50));
+
+    controller.x().whileTrue(elevator.moveTo(ElevatorConstants.HOME));
+
+    controller.leftTrigger().onTrue(elevator.moveTo(ElevatorConstants.L1));
+    controller.leftBumper().onTrue(elevator.moveTo(ElevatorConstants.L2));
+    controller.rightTrigger().onTrue(elevator.moveTo(ElevatorConstants.L3));
+    controller.rightBumper().onTrue(elevator.moveTo(ElevatorConstants.L4));
+    
+    
+
+    controller.y().whileTrue(elevator.runPercent(0.1))//make button
                 .onFalse(elevator.runPercent(0.0));
 
-    controller.povDown().whileTrue(elevator.runPercent(-0.1))//make button
+    controller.a().whileTrue(elevator.runPercent(-0.1))//make button
                 .onFalse(elevator.runPercent(0.0));
 
-    controller.povRight().whileTrue(elevator.resetHeight());
+    //controller.povRight().whileTrue(elevator.resetHeight());
+
+    //controller.povRight().whileTrue(intake.outtakeCommand(30));
+    controller.b().whileTrue(intake.intakeCommand(30));
                 
 
 
     // controller.povLeft().onTrue(playMusicAll("Undertale.chrp")); // make button
 
     // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+    //                 drive)
+    //             .ignoringDisable(true));
   }
 
   /**
@@ -245,9 +297,9 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
-  public Command playMusicAll(String fileNeame){
-    all_orchestra.loadMusic(fileNeame);
-     return Commands.runOnce(() -> all_orchestra.play());
-    } 
+  // public Command playMusicAll(String fileNeame){
+  //   all_orchestra.loadMusic(fileNeame);
+  //    return Commands.runOnce(() -> all_orchestra.play());
+  //   } 
   
 }
