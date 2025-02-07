@@ -34,7 +34,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.commons.TunableDashboardNumber;
+import frc.robot.util.TunableDashboardNumber;
 
 /**
  * This roller implementation is for a Talon FX driving a motor like the Falon 500 or Kraken X60.
