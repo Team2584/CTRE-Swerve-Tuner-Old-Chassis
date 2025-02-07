@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
+    
   @AutoLog
   public static class VisionIOInputs {
     public boolean connected = false;
