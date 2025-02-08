@@ -1,3 +1,4 @@
 {
-    "wpilib.skipTests": false
+    "wpilib.skipTests": false,
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
