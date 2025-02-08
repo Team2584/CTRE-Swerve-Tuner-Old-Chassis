@@ -133,7 +133,6 @@ public class RobotContainer {
         elevator = new Elevator(new ElevatorIOSim());
         wrist = new Wrist(new WristIOSim());
         coral = new Coral(new CoralIOSim());
-        vision = null;
         break;
 
       default:
