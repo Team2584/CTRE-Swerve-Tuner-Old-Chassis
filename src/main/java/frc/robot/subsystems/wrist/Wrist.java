@@ -8,6 +8,11 @@ import frc.robot.subsystems.wrist.WristIOInputsAutoLogged;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+
+
 
 
 public class Wrist extends SubsystemBase {
@@ -23,12 +28,28 @@ public class Wrist extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    Logger.processInputs("Wrist", inputs);
     
+  }
+
+  public Command setWristAngle(double anglePos){
+    return runOnce(() -> io.setPose(anglePos));
   }
 
   public Command moveWrist(double percent){
     return runEnd(() -> io.moveWrist(percent), () -> io.moveWrist(0));
+  }
+
+  public TalonFXConfiguration getWristConfigs(){
+    return io.getWristConfigs();
+  }
+
+  public TalonFX getWristMotor(){
+    return io.getWristMotor();
+  }
+
+  public MotionMagicVoltage getMMVCont(){
+    return io.getmmMMVCont();
   }
   
     

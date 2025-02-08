@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ScoreCoral;
+import frc.robot.commands.WristToAngle;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberConstants;
@@ -124,6 +126,7 @@ public class RobotContainer {
         elevator = new Elevator(new ElevatorIOSim());
         wrist = new Wrist(new WristIOSim());
         coral = new Coral(new CoralIOSim());
+        vision = null;
         break;
 
       default:
@@ -231,20 +234,21 @@ public class RobotContainer {
     
 
     
-    controller.start().whileTrue(coral.moveSpeed(0.375));
+    //controller.b().whileTrue(coral.moveSpeed(-0.375));
 
     // Elevator command triggers
-    controller.povUp().whileTrue(wrist.moveWrist(-5));
-    controller.povDown().whileTrue(wrist.moveWrist(5));
-    
-    controller.povLeft().whileTrue(climb.runPercent(50));
-    controller.povRight().whileTrue(climb.runPercent(-50));
+    controller.povDown().onTrue(new WristToAngle(wrist, -75));
+    controller.povUp().onTrue(new WristToAngle(wrist, -90));
+
+    controller.povLeft().whileTrue(wrist.setWristAngle(0));
+    // controller.povLeft().whileTrue(climb.runPercent(50));
+    controller.povRight().whileTrue(wrist.setWristAngle(-90));
 
     controller.x().whileTrue(elevator.moveTo(ElevatorConstants.HOME));
 
     controller.leftTrigger().onTrue(elevator.moveTo(ElevatorConstants.L1));
     controller.leftBumper().onTrue(elevator.moveTo(ElevatorConstants.L2));
-    controller.rightTrigger().onTrue(elevator.moveTo(ElevatorConstants.L3));
+    //controller.rightTrigger().onTrue(elevator.moveTo(ElevatorConstants.L3));
     controller.rightBumper().onTrue(elevator.moveTo(ElevatorConstants.L4));
     
     
@@ -258,7 +262,7 @@ public class RobotContainer {
     //controller.povRight().whileTrue(elevator.resetHeight());
 
     //controller.povRight().whileTrue(intake.outtakeCommand(30));
-    controller.b().whileTrue(intake.intakeCommand(30));
+    controller.b().whileTrue(new ScoreCoral(elevator,wrist,coral,ElevatorConstants.L3,controller.rightTrigger().getAsBoolean()));
                 
 
 

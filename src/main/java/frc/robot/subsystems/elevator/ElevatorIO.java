@@ -34,9 +34,4 @@ public interface ElevatorIO {
 
   /* Updates tunable numbers if neccesary */
   public default void updateTunableNumbers() {}
-
-  /** Run music on drive motors for the funny
-   *0=Stop, 1=Play, 2=Pause*/
-  public default void musicState(String chrpFile) {} //
-
 }
