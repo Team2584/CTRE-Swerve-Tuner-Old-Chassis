@@ -1,8 +1,20 @@
 package frc.robot.commands;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.*;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
+
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.subsystems.drive.Drive;
@@ -35,16 +47,20 @@ public void initialize() {
     adStar.setGoalPosition(goalPose.getTranslation());
     PathPlannerPath path = adStar.getCurrentPath(constraints, new GoalEndState(0.0, goalPose.getRotation()));
 
-    // followTrajectoryCommand = new SwerveControllerCommand(
-    //     path.getTrajectory(),
-    //     drive::getPose,
-    //     drive.getKinematics(),
-    //     new PIDController(1.0, 0.0, 0.0),
-    //     new PIDController(1.0, 0.0, 0.0),
-    //     new PIDController(1.0, 0.0, 0.0),
-    //     drive::setModuleStates,
-    //     drive
-    // );
+    ChassisSpeeds startingSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, 0, startingPose.getRotation());
+    RobotConfig config = drive.getRobotConfig();
+    PathPlannerTrajectory trajectory = path.generateTrajectory(startingSpeeds, startingPose.getRotation(), config);
+
+    followTrajectoryCommand = new SwerveControllerCommand(
+        trajectory,
+        drive::getPose,
+        drive.getKinematics(),
+        new PIDController(1.0, 0.0, 0.0),
+        new PIDController(1.0, 0.0, 0.0),
+        new PIDController(1.0, 0.0, 0.0),
+        drive::setModuleStates,
+        drive
+    );
 
     followTrajectoryCommand.initialize();
 }

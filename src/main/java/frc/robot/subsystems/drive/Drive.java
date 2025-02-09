@@ -86,6 +86,9 @@ public class Drive extends SubsystemBase {
               1),
           getModuleTranslations());
 
+  public RobotConfig getRobotConfig(){
+    return PP_CONFIG;
+  }
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
