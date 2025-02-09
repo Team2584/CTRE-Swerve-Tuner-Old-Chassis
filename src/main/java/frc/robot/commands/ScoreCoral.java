@@ -33,7 +33,7 @@ public class ScoreCoral extends SequentialCommandGroup{
 
         // new InstantCommand(() -> new DriveToPose(drive, () -> new Pose2d())),
         
-        new WristToAngle(wrist,-75),
+        wrist.setWristAngle(-15),
         elevator.moveTo(coralLevel),
 
         coral.moveSpeed(0.375).onlyWhile(()->scoreConfirm)
