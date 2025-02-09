@@ -96,6 +96,10 @@ public class Drive extends SubsystemBase {
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
+  public SwerveDriveKinematics getKinematics() {
+    return kinematics;
+}
+
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
@@ -339,13 +343,12 @@ public class Drive extends SubsystemBase {
   }
 
   /** Adds a new timestamped vision measurement. */
-  public void addVisionMeasurement(
-      Pose2d visionRobotPoseMeters,
-      double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
-    poseEstimator.addVisionMeasurement(
-        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
-  }
+  public void addVisionMeasurement(Pose2d visionRobotPoseMeters, 
+                                   double timestampSeconds, 
+                                   Matrix<N3, N1> visionMeasurementStdDevs) {
+    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+}
+
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {

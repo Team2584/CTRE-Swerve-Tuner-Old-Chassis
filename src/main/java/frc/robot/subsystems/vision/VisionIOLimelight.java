@@ -1,8 +1,13 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
@@ -64,29 +69,31 @@ public class VisionIOLimelight implements VisionIO {
     List<PoseObservation> poseObservations = new LinkedList<>();
 
     for (var rawSample : megatag2Subscriber.readQueue()) {
-      if (rawSample.value.length == 0) continue;
-      for (int i = 11; i < rawSample.value.length; i += 7) {
-        tagIds.add((int) rawSample.value[i]);
-      }
-      poseObservations.add(
-          new PoseObservation(
-              // Timestamp, based on server timestamp of publish and latency
-              rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
+        if (rawSample.value.length == 0) continue;
+        
+        // Accumulate tag IDs (for logging or filtering)
+        for (int i = 11; i < rawSample.value.length; i += 7) {
+            tagIds.add((int) rawSample.value[i]);
+        }
+        
+        // Compute vision timestamp in seconds
+        // rawSample.timestamp is in microseconds and rawSample.value[6] is the latency in milliseconds.
+        double visionTimestamp = rawSample.timestamp * 1e-6 - rawSample.value[6] * 1e-3;
+        
+        // Parse raw 3D pose
+        Pose3d rawPose3d = parsePose(rawSample.value);
 
-              // 3D pose estimate
-              parsePose(rawSample.value),
-
-              // Ambiguity, zeroed because the pose is already disambiguated
-              0.0,
-
-              // Tag count
-              (int) rawSample.value[7],
-
-              // Average tag distance
-              rawSample.value[9]
-              
-              ));
+        // Add pose observations
+        poseObservations.add(new PoseObservation(
+            visionTimestamp,      // The calculated vision timestamp (seconds)
+            rawPose3d,            // The raw 3D pose (useful for logging or further processing)
+            0.0,                  // Ambiguity (set to zero since MegaTag2 disambiguates automatically)
+            (int) rawSample.value[7],  // The tag count
+            rawSample.value[9]         // The average tag distance
+        ));
     }
+    
+
 
     // Save pose observations to inputs object
     inputs.poseObservations = new PoseObservation[poseObservations.size()];

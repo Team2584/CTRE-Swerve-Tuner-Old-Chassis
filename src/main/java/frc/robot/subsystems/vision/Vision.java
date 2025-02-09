@@ -17,7 +17,7 @@ import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
-  private final VisionConsumer consumer;
+      private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
@@ -127,7 +127,8 @@ public class Vision extends SubsystemBase {
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),
-            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
+        );
       }
 
       // Log camera datadata
