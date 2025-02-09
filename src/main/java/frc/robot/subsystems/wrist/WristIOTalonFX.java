@@ -53,9 +53,9 @@ public class WristIOTalonFX implements WristIO {
   /* Configs */
   private static final TalonFXConfiguration wristConfigs = new TalonFXConfiguration();
   // private static final CANdiConfiguration wristEncoderConfigs = new CANdiConfiguration();
-  // private final MotionMagicConfigs motionMagicConfigs;
+  private final MotionMagicConfigs motionMagicConfigs;
   private final MotionMagicVoltage motionProfileReq;
-  // private final VoltageOut voltageRequest;
+  private final VoltageOut voltageRequest;
   private Slot0Configs slot0Configs;
 
 
@@ -86,17 +86,17 @@ public class WristIOTalonFX implements WristIO {
     // this.wristEncoder = new CANdi(WRIST_ENCODER_ID);
 
     motionProfileReq = new MotionMagicVoltage(0); // This is the motion profile, all setControl must target position based on this (m_)
-    // voltageRequest = new VoltageOut(0);
+    voltageRequest = new VoltageOut(0);
 
     // wristEncoderConfigs.PWM1.AbsoluteSensorDiscontinuityPoint = 1;
     // wristEncoderConfigs.PWM1.AbsoluteSensorOffset = -0.9335;
     // wristEncoder.getConfigurator().apply(wristEncoderConfigs);
 
 
-    // FeedbackConfigs fdb = wristConfigs.Feedback;
-    // // fdb.FeedbackRemoteSensorID = wristEncoder.getDeviceID();
-    // // fdb.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANdiPWM1;
-    // fdb.SensorToMechanismRatio = WRIST_GEAR_RATIO;
+    FeedbackConfigs fdb = wristConfigs.Feedback;
+    // fdb.FeedbackRemoteSensorID = wristEncoder.getDeviceID();
+    // fdb.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANdiPWM1;
+    fdb.SensorToMechanismRatio = WRIST_GEAR_RATIO;
 
     this.wrist.setPosition(-0.25);
     /* Create Configs */
@@ -105,16 +105,16 @@ public class WristIOTalonFX implements WristIO {
     wristConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     wristConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    // slot0Configs = wristConfigs.Slot0; //PID Gains
-    // slot0Configs.kP = kP.get(); // Adjust based on your needs
-    // slot0Configs.kI = kI.get();
-    // slot0Configs.kD = kD.get();
-    // slot0Configs.kG = kG.get();
-    // slot0Configs.kS = kS.get(); // Static friction compensation
-    // slot0Configs.kV = kV.get(); // Roughly 1.2V per RPS
-    // slot0Configs.kA = kA.get(); // Roughly 1.2V per RPS
-    // slot0Configs.kG = kG.get(); // Roughly 1.2V per RPS
-    // slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
+    slot0Configs = wristConfigs.Slot0; //PID Gains
+    slot0Configs.kP = kP.get(); // Adjust based on your needs
+    slot0Configs.kI = kI.get();
+    slot0Configs.kD = kD.get();
+    slot0Configs.kG = kG.get();
+    slot0Configs.kS = kS.get(); // Static friction compensation
+    slot0Configs.kV = kV.get(); // Roughly 1.2V per RPS
+    slot0Configs.kA = kA.get(); // Roughly 1.2V per RPS
+    slot0Configs.kG = kG.get(); // Roughly 1.2V per RPS
+    slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
 
 
     /* Initialize Status Signals */
@@ -125,15 +125,15 @@ public class WristIOTalonFX implements WristIO {
 
 
     //Add MotionMagic to Configs
-    // motionMagicConfigs = wristConfigs.MotionMagic;
-    // motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get(); // Rotations per second
-    // motionMagicConfigs.MotionMagicAcceleration=  motionAcceleration.get(); // Rotations per second^2
-    // motionMagicConfigs.MotionMagicJerk =  motionJerk.get(); // Rotations per second ^3
+    motionMagicConfigs = wristConfigs.MotionMagic;
+    motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get(); // Rotations per second
+    motionMagicConfigs.MotionMagicAcceleration=  motionAcceleration.get(); // Rotations per second^2
+    motionMagicConfigs.MotionMagicJerk =  motionJerk.get(); // Rotations per second ^3
 
     
 
     /* Apply Configs */
-    // wrist.getConfigurator().apply(wristConfigs, 0.25);
+    wrist.getConfigurator().apply(wristConfigs, 0.25);
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
@@ -160,10 +160,10 @@ public class WristIOTalonFX implements WristIO {
 
   }
   
-  // @Override
-  // public void setVoltage(double volts) {
-  //   wrist.setControl(voltageRequest.withOutput(volts));
-  // }
+  @Override
+  public void setVoltage(double volts) {
+    wrist.setControl(voltageRequest.withOutput(volts));
+  }
 
   @Override
   public TalonFX getWristMotor(){
@@ -190,9 +190,9 @@ public class WristIOTalonFX implements WristIO {
     wrist.setControl(motionProfileReq.withPosition(Units.degreesToRotations(pose)));
   }
 
-  // @Override
-  // public void moveWrist(double percentSpeed){
-  //   wrist.setControl(voltageRequest.withOutput((percentSpeed/100)*12));
-  // }
+  @Override
+  public void moveWrist(double percentSpeed){
+    wrist.setControl(voltageRequest.withOutput((percentSpeed/100)*12));
+  }
   
 }
