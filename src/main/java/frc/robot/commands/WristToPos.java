@@ -11,46 +11,47 @@ import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.FlipperSubsystem;
+import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
-public class ArmToPos extends Command {
-    private final FlipperSubsystem flipperSubsystem;
+public class WristToPos extends Command {
+    private final WristSubsystem wristSubsystem;
     private double setpoint;
     private double allowed_error;
 
 
-    public ArmToPos (FlipperSubsystem flipperSubsystem, double setpoint){
-        this.flipperSubsystem = flipperSubsystem;
+    public WristToPos (WristSubsystem wristSubsystem, double setpoint){
+        this.wristSubsystem = wristSubsystem;
         this.setpoint = setpoint;
         this.allowed_error = 0.05;
 
-        addRequirements(flipperSubsystem);
+        addRequirements(wristSubsystem);
     }
 
     @Override
     public void initialize(){
-        FeedbackConfigs fdb = flipperSubsystem.getFlipperConfig().Feedback;
+        FeedbackConfigs fdb = wristSubsystem.getWristConfig().Feedback;
         fdb.SensorToMechanismRatio = 85.33; // X motor rotations per mechanism rotation
 
-        MotionMagicConfigs mm = flipperSubsystem.getFlipperConfig().MotionMagic;
+        MotionMagicConfigs mm = wristSubsystem.getWristConfig().MotionMagic;
         mm.withMotionMagicCruiseVelocity(RotationsPerSecond.of(12))
         .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(8))
         .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(60));
 
 
-        Slot0Configs slot0 = flipperSubsystem.getFlipperConfig().Slot0;
-        slot0.kS = 0.30; // volts
+        Slot0Configs slot0 = wristSubsystem.getWristConfig().Slot0;
+        slot0.kS = 0.10; // volts
         slot0.kV = 0.1; // volts * seconds / distance
         slot0.kA = 0.01; // volts * seconds^2 / distance
-        slot0.kP = 33;  // proportional
+        slot0.kP = 12;  // proportional
         slot0.kI = 0;    // integral
         slot0.kD = 0.8;  // derivative
-        flipperSubsystem.getFlipperMotor().getConfigurator().apply(flipperSubsystem.getFlipperConfig());
+        wristSubsystem.getWristMotor().getConfigurator().apply(wristSubsystem.getWristConfig());
     }
 
     @Override
     public void execute() {
-        flipperSubsystem.getFlipperMotor().setControl(flipperSubsystem.getMMVCont().withPosition(setpoint));
+        wristSubsystem.getWristMotor().setControl(wristSubsystem.getMMVCont().withPosition(setpoint));
     }
 
     @Override
@@ -60,8 +61,8 @@ public class ArmToPos extends Command {
 
     @Override
     public boolean isFinished() {
-        if (flipperSubsystem.getFlipperMotor().getPosition().getValueAsDouble() < setpoint+allowed_error && 
-            flipperSubsystem.getFlipperMotor().getPosition().getValueAsDouble() > setpoint-allowed_error ){
+        if (wristSubsystem.getWristMotor().getPosition().getValueAsDouble() < setpoint+allowed_error && 
+            wristSubsystem.getWristMotor().getPosition().getValueAsDouble() > setpoint-allowed_error ){
                 return true;
             }
         return false;

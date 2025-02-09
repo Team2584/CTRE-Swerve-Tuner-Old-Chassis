@@ -11,32 +11,22 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
-import choreo.util.AllianceFlipUtil.Flipper;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.IntakeBucket;
-import frc.robot.commands.OuttakeBucket;
-import frc.robot.commandgroup.PickupBucket;
-import frc.robot.commands.ArmToPos;
-import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.ClawSubsystem;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.FlipperSubsystem;
 
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.Algae.AlgaeSubsystem;
+import frc.robot.Constants.*;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 public class RobotContainer {
     private double governor = 0.35; // Added to slow MaxSpeed to 35%. Set to 1 for full speed.
@@ -64,31 +54,40 @@ public class RobotContainer {
 
     private final Field2d m_field = new Field2d();
 
-    private ClawSubsystem buildClaw() {
-        return new ClawSubsystem(15);
+    private ElevatorSubsystem buildElevatorSubsystem() {
+      return new ElevatorSubsystem();
     }
 
-    private FlipperSubsystem buildFlipper() {
-        return new FlipperSubsystem(16);
+    private AlgaeSubsystem buildAlgaeMech() {
+        return new AlgaeSubsystem();
     }
 
-    private ClawSubsystem getClaw() {
-        return claw;
+    private WristSubsystem buildWrist() {
+        return new WristSubsystem();
     }
 
-    private FlipperSubsystem getFlipper() {
-        return flipper;
+    private ElevatorSubsystem getElevator() {
+      return elevator;
     }
 
-    private final ClawSubsystem claw = buildClaw();
-    private final FlipperSubsystem flipper = buildFlipper();
+    private AlgaeSubsystem getAlgaeMech() {
+        return algae;
+    }
+
+    private WristSubsystem getWrist() {
+        return wrist;
+    }
+
+    private final AlgaeSubsystem algae = buildAlgaeMech();
+    private final WristSubsystem wrist = buildWrist();
+    private final ElevatorSubsystem elevator = buildElevatorSubsystem();
 
 
 
   public RobotContainer() {
 
     
-    autoChooser = AutoBuilder.buildAutoChooser("Tests");
+    autoChooser = AutoBuilder.buildAutoChooser("line");
 
     SmartDashboard.putData("Auto Mode", autoChooser);
     SmartDashboard.putData("Field", m_field);
@@ -130,11 +129,11 @@ public class RobotContainer {
       // reset the field-centric heading on left bumper press
       joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      joystick.leftTrigger().whileTrue(new PickupBucket(getFlipper(), getClaw())).onFalse((getClaw().runOnce(() -> getClaw().setClawSpeed(0)).andThen(new ArmToPos(getFlipper(), 0))));
-      joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
-      joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
-      joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));
-      joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
+      joystick.leftTrigger().whileTrue(new InstantCommand(() -> elevator.setHeight(ElevatorConstants.L3)));
+      // joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
+      // joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
+      // joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));
+      // joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
 
     
       drivetrain.registerTelemetry(logger::telemeterize);
@@ -142,6 +141,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
       /* First put the drivetrain into auto run mode, then run the auto */
-      return autoChooser.getSelected();
+      return null;
+    //   return autoChooser.getSelected();
   }
 }
