@@ -1,305 +1,158 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.Orchestra;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ScoreCoral;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberConstants;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorConstants;
-import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOSim;
-import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeConstants;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.intake.IntakeIOTalonFX;
-import frc.robot.subsystems.coral.*;
-import frc.robot.subsystems.wrist.*;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.Algae.AlgaeSubsystem;
+import frc.robot.Constants.*;
+import frc.robot.commands.WristToPos;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
- */
 public class RobotContainer {
-  // Subsystems
-  private final Drive drive;
-  private final Climber climb;
-  private final Intake intake;
-  private final Coral coral;
-  private final Wrist wrist;
-  private final Elevator elevator;
-  private final Vision vision;
+    private double governor = 0.35; // Added to slow MaxSpeed to 35%. Set to 1 for full speed.
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12VoltsMps desired top speed
+    private double MaxAngularRate = RotationsPerSecond.of(1*Math.PI).in(RadiansPerSecond); // 1/2 of a rotation per second max angular velocity
 
-  // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+    private final CommandXboxController joystick = new CommandXboxController(0);
 
-  // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+    private final Telemetry logger = new Telemetry(MaxSpeed);
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-
-    switch (Constants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
-
-        climb = new Climber(new ClimberIOTalonFX());
-        intake = new Intake(new IntakeIOTalonFX());
-        elevator = new Elevator(new ElevatorIOTalonFX());
-        wrist = new Wrist(new WristIOTalonFX());
-        coral = new Coral(new CoralIOTalonFX());
-        
-
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
-        break;
+    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
 
-      case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+    /* Setting up bindings for necessary control of the swerve drive platform */
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-         vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
+    /* Path follower */
+    private final SendableChooser<Command> autoChooser;
 
-        climb = new Climber(new ClimberIOSim());
-        intake = new Intake(new IntakeIOSim());
-        elevator = new Elevator(new ElevatorIOSim());
-        wrist = new Wrist(new WristIOSim());
-        coral = new Coral(new CoralIOSim());
-        break;
+    private final Field2d m_field = new Field2d();
 
-      default:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-
-        climb = new Climber(new ClimberIO() {});
-        intake = new Intake(new IntakeIO() {});
-        elevator = new Elevator(new ElevatorIO() {});
-        wrist = new Wrist(new WristIO() {});
-        coral = new Coral(new CoralIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-        break;
+    private ElevatorSubsystem buildElevatorSubsystem() {
+      return new ElevatorSubsystem();
     }
 
-    // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    private AlgaeSubsystem buildAlgaeMech() {
+        return new AlgaeSubsystem();
+    }
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-    // Configure the button bindings
-    configureButtonBindings();
+    private CoralSubsystem buildCoralMech() {
+      return new CoralSubsystem();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+    private WristSubsystem buildWrist() {
+        return new WristSubsystem();
+    }
 
-    // Lock to 0° when A button is held
-    // controller
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> new Rotation2d()));
+    private ElevatorSubsystem getElevator() {
+      return elevator;
+    }
 
-    // Switch to X pattern when X button is pressed
-    //controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    private AlgaeSubsystem getAlgaeMech() {
+        return algae;
+    }
 
-    // Elevator Scoring Controls for Coral
-    // controller.povUp().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povUp mapped to Top Left paddle
-    // controller.povRight().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povRight mapped to Bottom Left paddle
-    // controller.povDown().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povDown mapped to Top Right paddle
-    // controller.povLeft().whileTrue(elevator.moveTo(ElevatorConstants.L1)); //povLeft mapped to Bottom Right paddle
-
-    // controller.rightBumper().whileTrue(elevator.resetHeight()); //Coral Station intake/ Processor
-
-    // controller.leftTrigger().whileTrue(elevator.resetHeight()); //Algae reef intake
-
-    // controller.rightTrigger().whileTrue(elevator.resetHeight()); // Score Confirm
-
-
-
-
-    // while (controller.rightBumper().getAsBoolean()){
-
-    //   controller.rightBumper().whileTrue(
-    //     DriveCommands.joystickDriveAtAngle(
-    //       drive,
-    //       () -> -controller.getLeftY(),
-    //       () -> -controller.getLeftX(),
-    //       () -> new Rotation2d()));
-
-    
-    //   controller.a().whileTrue(elevator.moveTo(ElevatorConstants.L1));
-    //   controller.b().whileTrue(elevator.moveTo(ElevatorConstants.L2));
-    //   controller.x().whileTrue(elevator.moveTo(ElevatorConstants.L3));
-    //   controller.y().whileTrue(elevator.moveTo(ElevatorConstants.L4));
-
-
-    // }
-    
-
-    
-    //controller.b().whileTrue(coral.moveSpeed(-0.375));
-
-    // Elevator command triggers
-    // controller.povDown().onTrue(new WristToAngle(wrist, -75));
-    // controller.povUp().onTrue(new WristToAngle(wrist, -90));
-
-    // controller.povLeft().whileTrue(wrist.setWristAngle(0));
-    // // controller.povLeft().whileTrue(climb.runPercent(50));
-    // controller.povRight().whileTrue(wrist.setWristAngle(-90));
-
-    // controller.x().whileTrue(elevator.moveTo(ElevatorConstants.HOME));
-
-    // controller.leftTrigger().onTrue(elevator.moveTo(ElevatorConstants.L1));
-    // controller.leftBumper().onTrue(elevator.moveTo(ElevatorConstants.L2));
-    // //controller.rightTrigger().onTrue(elevator.moveTo(ElevatorConstants.L3));
-    // controller.rightBumper().onTrue(elevator.moveTo(ElevatorConstants.L4));
-    
-    
-
-    // controller.y().whileTrue(elevator.runPercent(0.1))//make button
-    //             .onFalse(elevator.runPercent(0.0));
-
-    // controller.a().whileTrue(elevator.runPercent(-0.1))//make button
-    //             .onFalse(elevator.runPercent(0.0));
-
-    // //controller.povRight().whileTrue(elevator.resetHeight());
-
-    // //controller.povRight().whileTrue(intake.outtakeCommand(30));
-    // controller.b().whileTrue(new ScoreCoral(elevator,wrist,coral,ElevatorConstants.L3,controller.rightTrigger().getAsBoolean()));
-
-    controller.a().whileTrue(DriveCommands.wheelRadiusCharacterization(drive));
-    controller.b().whileTrue(DriveCommands.feedforwardCharacterization(drive));
-    controller.x().whileTrue(drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    controller.y().whileTrue(drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    controller.rightTrigger().whileTrue(drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    controller.rightBumper().whileTrue(drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-
-                
-
-
-    // controller.povLeft().onTrue(playMusicAll("Undertale.chrp")); // make button
-
-    // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-    //                 drive)
-    //             .ignoringDisable(true));
+    private CoralSubsystem getCoral() {
+      return coral;
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
+    private WristSubsystem getWrist() {
+        return wrist;
+    }
+
+    private final AlgaeSubsystem algae = buildAlgaeMech();
+    private final CoralSubsystem coral = buildCoralMech();
+    private final WristSubsystem wrist = buildWrist();
+    private final ElevatorSubsystem elevator = buildElevatorSubsystem();
+
+
+
+  public RobotContainer() {
+
+    
+    autoChooser = AutoBuilder.buildAutoChooser("line");
+
+    SmartDashboard.putData("Auto Mode", autoChooser);
+    SmartDashboard.putData("Field", m_field);
+        
+    configureBindings();
+  }
+
+  private void configureBindings() {
+      // Note that X is defined as forward according to WPILib convention,
+      // and Y is defined as to the left according to WPILib convention.
+      drivetrain.setDefaultCommand(
+          // Drivetrain will execute this command periodically
+          drivetrain.applyRequest(() ->
+              drive.withVelocityX(-joystick.getLeftY() * MaxSpeed * governor) // Drive forward with negative Y (forward)
+                  .withVelocityY(-joystick.getLeftX() * MaxSpeed * governor) // Drive left with negative X (left)
+                  .withRotationalRate(-joystick.getRightX() * MaxAngularRate * governor) // Drive counterclockwise with negative X (left)
+          )
+      );
+
+    //   joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+      joystick.b().whileTrue(drivetrain.applyRequest(() ->
+          point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+      ));
+
+      joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
+          forwardStraight.withVelocityX(0.5).withVelocityY(0))
+      );
+      joystick.pov(180).whileTrue(drivetrain.applyRequest(() ->
+          forwardStraight.withVelocityX(-0.5).withVelocityY(0))
+      );
+
+      // Run SysId routines when holding back/start and X/Y.
+      // Note that each routine should be run exactly once in a single log.
+      joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+      joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+      joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+      joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+      // reset the field-centric heading on left bumper press
+      joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+      // joystick.leftTrigger().whileTrue(new InstantCommand(() -> elevator.setHeight(ElevatorConstants.L3)));
+      joystick.a().whileTrue(new WristToPos(wrist,0));
+      //joystick.povDown().whileTrue(wrist.runOnce(()->wrist.setWristSpeed(0.1)));
+      // joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
+      // joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
+      // joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));
+      // joystick.x().whileTrue(getClaw().runOnce(() -> getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() -> getClaw().setClawSpeed(0)));
+
+    
+      drivetrain.registerTelemetry(logger::telemeterize);
+  }
+
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+      /* First put the drivetrain into auto run mode, then run the auto */
+      return autoChooser.getSelected();
   }
 }

@@ -1,39 +1,61 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package frc.robot;
 
-import edu.wpi.first.wpilibj.RobotBase;
+public class Constants {
 
-/**
- * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
- * (log replay from a file).
- */
-public final class Constants {
-  public static final Mode simMode = Mode.SIM;
-  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+  public static final class ElevatorConstants{
+    /* CAN IDs */
+  public static final int ELEVATOR_LEFT_ID = 21;
+  public static final int ELEVATOR_RIGHT_ID = 20;
 
-  public static enum Mode {
-    /** Running on a real robot. */
-    REAL,
+  /* Elevator Setpoints, Speeds, and Positions  */
+  public static final double HOME = 0; //TUNE ME
 
-    /** Running a physics simulator. */
-    SIM,
+  public static final double INTAKE_CORAL = 0; //TUNE ME
 
-    /** Replaying from a log file. */
-    REPLAY
+  public static final double L1 = 3.8; //TUNE ME
+  public static final double L2 = 15; //TUNE ME
+  public static final double L3 = 30; //TUNE ME
+  public static final double L4 = 54.5; //TUNE ME
+
+  public static final double GROUND_ALGAE = 0; //TUNE ME
+  public static final double ALGAE_LOW = 0; //TUNE ME
+  public static final double ALGAE_HIGH = 0; //TUNE ME
+
+  public static final double NET = 0;
+
+
+
+  /* Physical Measurements */
+  public static final double ELEVATOR_MIN_HEIGHT = 0;
+  public static final double ELEVATOR_MAX_HEIGHT = 55; // (actually ~~65in)
+  public static final double ELEVATOR_PULLEY_PITCH_DIAMETER  = 1.504;
+  public static final double ELEVATOR_GEAR_RATIO = 8.571;
   }
 
+  public static final class WristConstants{
+
+    public static final int WRIST_ID = 22;
+    public static final double WRIST_GEAR_RATIO = 93.09;
+
+    public static final int WRIST_ENCODER_ID = 25;
   
+    public static final int currentLimit = 60;
+  }
+
+  public static final class AlgaeConstants{
+    public static final int ALGAE_ID = 17;
+  }
+
+  public static final class ClimberConstants{
+    public static final int leftClimberCanId = 15;
+    public static final int rightClimberCanId = 16;
+    public static final double motorReduction = 180.0;
+    public static final int currentLimit = 40; 
+  }
+
+  public static final class CoralMechConstants{
+    public static final int CORAL_MECH_ID = 23;
+    public static final int CORAL_SENSOR_ID = 26;
+  }
+
 }
