@@ -55,14 +55,14 @@ public class ClimberSubsystem extends SubsystemBase {
   * Sets the climb to lift the robot at a contant speed
   */
   public Command liftRobot() {
-    return runEnd(()->setVoltage(12), ()->setVoltage(0));
+    return runEnd(()->setVoltage(6), ()->setVoltage(0));
   }
 
   /**
   * Sets the climb to lower the robot at a contant speed
   */
   public Command lowerRobot() {
-    return runEnd(()->setVoltage(-12), ()->setVoltage(0));
+    return runEnd(()->setVoltage(-6), ()->setVoltage(0));
   }
 
   /**

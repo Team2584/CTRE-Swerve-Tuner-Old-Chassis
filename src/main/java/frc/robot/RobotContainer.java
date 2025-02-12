@@ -21,11 +21,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-
+import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.Algae.AlgaeSubsystem;
 import frc.robot.Constants.*;
+import frc.robot.commands.WristToPos;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 public class RobotContainer {
@@ -62,6 +63,10 @@ public class RobotContainer {
         return new AlgaeSubsystem();
     }
 
+    private CoralSubsystem buildCoralMech() {
+      return new CoralSubsystem();
+  }
+
     private WristSubsystem buildWrist() {
         return new WristSubsystem();
     }
@@ -74,11 +79,16 @@ public class RobotContainer {
         return algae;
     }
 
+    private CoralSubsystem getCoral() {
+      return coral;
+  }
+
     private WristSubsystem getWrist() {
         return wrist;
     }
 
     private final AlgaeSubsystem algae = buildAlgaeMech();
+    private final CoralSubsystem coral = buildCoralMech();
     private final WristSubsystem wrist = buildWrist();
     private final ElevatorSubsystem elevator = buildElevatorSubsystem();
 
@@ -129,7 +139,9 @@ public class RobotContainer {
       // reset the field-centric heading on left bumper press
       joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      joystick.leftTrigger().whileTrue(new InstantCommand(() -> elevator.setHeight(ElevatorConstants.L3)));
+      // joystick.leftTrigger().whileTrue(new InstantCommand(() -> elevator.setHeight(ElevatorConstants.L3)));
+      joystick.a().whileTrue(new WristToPos(wrist,0));
+      //joystick.povDown().whileTrue(wrist.runOnce(()->wrist.setWristSpeed(0.1)));
       // joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
       // joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));
       // joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new OuttakeBucket(getClaw()));

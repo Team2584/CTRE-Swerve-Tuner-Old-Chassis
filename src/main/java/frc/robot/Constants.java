@@ -55,6 +55,7 @@ public class Constants {
 
   public static final class CoralMechConstants{
     public static final int CORAL_MECH_ID = 23;
+    public static final int CORAL_SENSOR_ID = 26;
   }
 
 }
