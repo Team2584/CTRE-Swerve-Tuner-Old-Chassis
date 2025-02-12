@@ -153,7 +153,6 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
       /* First put the drivetrain into auto run mode, then run the auto */
-      return null;
-    //   return autoChooser.getSelected();
+      return autoChooser.getSelected();
   }
 }
