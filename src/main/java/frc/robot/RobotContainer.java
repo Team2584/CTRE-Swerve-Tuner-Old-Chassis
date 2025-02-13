@@ -25,12 +25,14 @@ import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.AlgaeSubsystem;
-import frc.robot.Constants.*;
+import static frc.robot.Constants.*;
+import static frc.robot.Constants.ElevatorConstants.*;
 import frc.robot.commands.GoToNeutral;
 import frc.robot.commands.ReefAlgae;
 import frc.robot.commands.ScoreCoral;
 import frc.robot.commands.WristToPos;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class RobotContainer {
     private double governor = 0.35; // Added to slow MaxSpeed to 35%. Set to 1 for full speed.
@@ -145,11 +147,11 @@ public class RobotContainer {
       // joystick.leftTrigger().whileTrue(new InstantCommand(() -> elevator.setHeight(ElevatorConstants.L3)));
       joystick.a().whileTrue(wrist.WristPose(-80));
       joystick.b().whileTrue(wrist.WristPose(-90));
-      joystick.x().onTrue(new ScoreCoral(elevator,wrist,coral,Constants.ElevatorConstants.L3)).onFalse(new InstantCommand(()->elevator.setHeight(0)));
-      joystick.y().onTrue(new ScoreCoral(elevator,wrist,coral,Constants.ElevatorConstants.L4)).onFalse(new InstantCommand(()->elevator.setHeight(0)));
+      joystick.x().onTrue(new ScoreCoral(elevator,wrist,coral,L3)).onFalse(new InstantCommand(()->elevator.setHeight(0)));
+      joystick.y().onTrue(new ScoreCoral(elevator,wrist,coral,L4)).onFalse(new InstantCommand(()->elevator.setHeight(0)));
       joystick.rightTrigger().whileTrue(coral.shootCoral());
       joystick.leftBumper().onTrue(coral.intakeCoral());
-      joystick.povUp().onTrue(new ReefAlgae(elevator,wrist,algae,Constants.ElevatorConstants.L3)).onFalse(new InstantCommand(()->elevator.setHeight(0)).andThen(new InstantCommand(()->algae.setClawSpeed(0))));
+      joystick.leftTrigger().onTrue(new ReefAlgae(elevator,wrist,algae,ALGAE_HIGH)).onFalse(new ParallelCommandGroup(new InstantCommand(()->elevator.setHeight(0)),new InstantCommand(()->algae.setClawSpeed(0)),wrist.WristPose(-50)));
 
       //joystick.povDown().whileTrue(wrist.runOnce(()->wrist.setWristSpeed(0.1)));
       // joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));

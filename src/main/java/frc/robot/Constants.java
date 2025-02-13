@@ -18,8 +18,8 @@ public class Constants {
   public static final double L4 = 54.5; //TUNE ME
 
   public static final double GROUND_ALGAE = 0; //TUNE ME
-  public static final double ALGAE_LOW = 0; //TUNE ME
-  public static final double ALGAE_HIGH = 0; //TUNE ME
+  public static final double ALGAE_LOW = 20; //TUNE ME
+  public static final double ALGAE_HIGH = 37.5; //TUNE ME
 
   public static final double NET = 0;
 

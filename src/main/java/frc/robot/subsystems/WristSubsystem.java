@@ -106,10 +106,8 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public Command WristPose(double angle){
-        return runEnd(
-            ()->wrist.setControl(m_mmReq.withPosition(Units.degreesToRotations(angle))),
-            () -> wrist.setControl(vreq.withOutput(0))).until(()->(Units.rotationsToDegrees(wrist.getPosition().getValueAsDouble()) < angle+1 && 
-            Units.rotationsToDegrees(wrist.getPosition().getValueAsDouble()) > angle-1 ));
+        return run(
+            ()->wrist.setControl(m_mmReq.withPosition(Units.degreesToRotations(angle))));
 
     }
 
