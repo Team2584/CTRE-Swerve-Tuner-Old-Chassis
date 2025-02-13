@@ -24,8 +24,11 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
-import frc.robot.subsystems.Algae.AlgaeSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.Constants.*;
+import frc.robot.commands.GoToNeutral;
+import frc.robot.commands.ReefAlgae;
+import frc.robot.commands.ScoreCoral;
 import frc.robot.commands.WristToPos;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
@@ -118,16 +121,16 @@ public class RobotContainer {
       );
 
     //   joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-      joystick.b().whileTrue(drivetrain.applyRequest(() ->
-          point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-      ));
+      // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+      //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+      // ));
 
-      joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
-          forwardStraight.withVelocityX(0.5).withVelocityY(0))
-      );
-      joystick.pov(180).whileTrue(drivetrain.applyRequest(() ->
-          forwardStraight.withVelocityX(-0.5).withVelocityY(0))
-      );
+      // joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
+      //     forwardStraight.withVelocityX(0.5).withVelocityY(0))
+      // );
+      // joystick.pov(180).whileTrue(drivetrain.applyRequest(() ->
+      //     forwardStraight.withVelocityX(-0.5).withVelocityY(0))
+      // );
 
       // Run SysId routines when holding back/start and X/Y.
       // Note that each routine should be run exactly once in a single log.
@@ -137,10 +140,17 @@ public class RobotContainer {
       joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
       // reset the field-centric heading on left bumper press
-      joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+      //joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
       // joystick.leftTrigger().whileTrue(new InstantCommand(() -> elevator.setHeight(ElevatorConstants.L3)));
-      joystick.a().whileTrue(new WristToPos(wrist,0));
+      joystick.a().whileTrue(wrist.WristPose(-80));
+      joystick.b().whileTrue(wrist.WristPose(-90));
+      joystick.x().onTrue(new ScoreCoral(elevator,wrist,coral,Constants.ElevatorConstants.L3)).onFalse(new InstantCommand(()->elevator.setHeight(0)));
+      joystick.y().onTrue(new ScoreCoral(elevator,wrist,coral,Constants.ElevatorConstants.L4)).onFalse(new InstantCommand(()->elevator.setHeight(0)));
+      joystick.rightTrigger().whileTrue(coral.shootCoral());
+      joystick.leftBumper().onTrue(coral.intakeCoral());
+      joystick.povUp().onTrue(new ReefAlgae(elevator,wrist,algae,Constants.ElevatorConstants.L3)).onFalse(new InstantCommand(()->elevator.setHeight(0)).andThen(new InstantCommand(()->algae.setClawSpeed(0))));
+
       //joystick.povDown().whileTrue(wrist.runOnce(()->wrist.setWristSpeed(0.1)));
       // joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(), -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
       // joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new ArmToPos(getFlipper(),0));

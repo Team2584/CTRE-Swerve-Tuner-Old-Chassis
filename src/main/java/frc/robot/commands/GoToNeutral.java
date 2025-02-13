@@ -10,25 +10,30 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
 
-public class ScoreCoral extends SequentialCommandGroup {
+public class GoToNeutral extends SequentialCommandGroup {
 
-  public ScoreCoral(ElevatorSubsystem elevator, WristSubsystem wrist, CoralSubsystem coral, double coralLevel) {
+  public GoToNeutral(ElevatorSubsystem elevator, WristSubsystem wrist, AlgaeSubsystem algae) {
 
-    addRequirements(wrist, coral, elevator);
+    addRequirements(wrist, algae, elevator);
 
     addCommands(
 
         // new InstantCommand(() -> new DriveToPose(drive, () -> new Pose2d())),
+        
+   
+        new InstantCommand(()->elevator.setHeight(0)),
+        new InstantCommand(()-> algae.setClawSpeed(0)),
+        wrist.WristPose(-90)
 
-        new ParallelCommandGroup(wrist.WristPose(-45),
-        new InstantCommand(()->elevator.setHeight(coralLevel))),
-        wrist.WristPose(-75)
+
+
 
 
     );

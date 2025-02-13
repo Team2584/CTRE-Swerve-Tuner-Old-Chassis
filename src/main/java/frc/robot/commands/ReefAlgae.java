@@ -10,25 +10,29 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
 
-public class ScoreCoral extends SequentialCommandGroup {
+public class ReefAlgae extends SequentialCommandGroup {
 
-  public ScoreCoral(ElevatorSubsystem elevator, WristSubsystem wrist, CoralSubsystem coral, double coralLevel) {
+  public ReefAlgae(ElevatorSubsystem elevator, WristSubsystem wrist, AlgaeSubsystem algae, double algaeHeight) {
 
-    addRequirements(wrist, coral, elevator);
+    addRequirements(wrist, algae, elevator);
 
     addCommands(
 
         // new InstantCommand(() -> new DriveToPose(drive, () -> new Pose2d())),
+        
+        new ParallelCommandGroup(wrist.WristPose(5),
+        new InstantCommand(()->elevator.setHeight(algaeHeight))),
+        algae.intakeCommand().until(()->algae.holdingAlgae()).andThen(wrist.WristPose(-50)),
+        new InstantCommand(()->elevator.setHeight(0))
 
-        new ParallelCommandGroup(wrist.WristPose(-45),
-        new InstantCommand(()->elevator.setHeight(coralLevel))),
-        wrist.WristPose(-75)
+
 
 
     );

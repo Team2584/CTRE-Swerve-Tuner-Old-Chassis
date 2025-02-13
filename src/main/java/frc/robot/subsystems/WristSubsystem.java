@@ -61,11 +61,12 @@ public class WristSubsystem extends SubsystemBase {
 
         Slot0Configs slot0 = wristConfig.Slot0;
         slot0.kS = 0.3; // Add 0.25 V output to overcome static friction
-        slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+        slot0.kV = 0.1; // A velocity target of 1 rps results in 0.12 V output
         slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
         slot0.kP = 33; // A position error of 0.2 rotations results in 12 V output
         slot0.kI = 0; // No output for integrated error
         slot0.kD = 0.8; // A velocity error of 1 rps results in 0.5 V output
+        slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
         wrist.getConfigurator().apply(wristConfig,0.25);
 
@@ -107,15 +108,15 @@ public class WristSubsystem extends SubsystemBase {
     public Command WristPose(double angle){
         return runEnd(
             ()->wrist.setControl(m_mmReq.withPosition(Units.degreesToRotations(angle))),
-            () -> wrist.setControl(vreq.withOutput(0))).until(()->(Units.rotationsToDegrees(wrist.getPosition().getValueAsDouble()) < angle+5 && 
-            Units.rotationsToDegrees(wrist.getPosition().getValueAsDouble()) > angle-5 ));
+            () -> wrist.setControl(vreq.withOutput(0))).until(()->(Units.rotationsToDegrees(wrist.getPosition().getValueAsDouble()) < angle+1 && 
+            Units.rotationsToDegrees(wrist.getPosition().getValueAsDouble()) > angle-1 ));
 
     }
 
 
     @Override
     public void periodic() {
-        System.out.println("Wrist Position: " + wrist.getPosition().getValueAsDouble());
+        // System.out.println("Wrist Position: " + wrist.getPosition().getValueAsDouble());
 
     }
 

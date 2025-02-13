@@ -73,7 +73,7 @@ public class CoralSubsystem extends SubsystemBase {
    * Shoots the coral out. Coral mechanism will continue to spin while being called. Defaults to not moving.
    */
   public Command shootCoral(){
-    return runEnd(() -> setSpeed(0.375), () -> setSpeed(0));
+    return runEnd(() -> setSpeed(0.375), () -> setSpeed(0)).withTimeout(2.5);
   }
   
 
@@ -83,7 +83,7 @@ public class CoralSubsystem extends SubsystemBase {
    * Resets speed to zero when holding a Coral or when not being called.
    */
   public Command intakeCoral(){
-    return runEnd(() -> setSpeed(0.375), () -> setSpeed(0)).until(()->hasCoralDelayed()).andThen(runEnd(()->setSpeed(0.1),()->setSpeed(0)).withTimeout(0.5));
+    return runEnd(() -> setSpeed(0.375), () -> setSpeed(0)).until(()->hasCoral()).andThen(runEnd(()->setSpeed(0.2),()->setSpeed(0)).withTimeout(0.15));
   }
   
   /**
@@ -94,7 +94,7 @@ public class CoralSubsystem extends SubsystemBase {
   }
 
   public boolean hasCoral(){
-    if (coralSensor.getDistance().getValueAsDouble() < 0.09){
+    if (coralSensor.getDistance().getValueAsDouble() < 0.1){
       return true;
     }
     else{
