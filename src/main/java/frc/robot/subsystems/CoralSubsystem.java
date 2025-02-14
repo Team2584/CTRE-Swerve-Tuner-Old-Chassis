@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
@@ -37,6 +38,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.CoralMechConstants;
+import com.ctre.phoenix6.controls.PositionVoltage;
+
 
 
 /**
@@ -52,15 +55,27 @@ public class CoralSubsystem extends SubsystemBase {
   private static final TalonFXConfiguration coralConfigs = new TalonFXConfiguration();
   private static final CANrangeConfiguration coralSensorConfigs = new CANrangeConfiguration();
 
+  private final PositionVoltage vreq;
+
 
   public CoralSubsystem() {
     this.coral = new TalonFX(CoralMechConstants.CORAL_MECH_ID);
     this.coralSensor = new CANrange(CoralMechConstants.CORAL_SENSOR_ID);
 
+    vreq = new PositionVoltage(0);
+
 
    
     coralConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     coralConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+     Slot0Configs slot0 = coralConfigs.Slot0;
+        slot0.kS = 0; // Add 0.25 V output to overcome static friction
+        slot0.kV = 0.1; // A velocity target of 1 rps results in 0.12 V output
+        slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
+        slot0.kP = 8; // A position error of 0.2 rotations results in 12 V output
+        slot0.kI = 0; // No output for integrated error
+        slot0.kD = 0; // A velocity error of 1 rps results in 0.5 V output
 
 
 
@@ -83,13 +98,17 @@ public class CoralSubsystem extends SubsystemBase {
    * Resets speed to zero when holding a Coral or when not being called.
    */
   public Command intakeCoral(){
-    return runEnd(() -> setSpeed(0.375), () -> setSpeed(0)).until(()->hasCoral()).andThen(runEnd(()->setSpeed(0.2),()->setSpeed(0)).withTimeout(0.15));
+    return runEnd(() -> setSpeed(0.2), () -> setSpeed(0)).until(()->hasCoral()).andThen(()->coral.setControl(vreq.withPosition(coral.getPosition().getValueAsDouble() + 3.75)));
   }
   
   /**
   * Sets the speed of the coral rollers 
   */
   public void setSpeed(double speed) {
+    coral.set(speed);
+  }
+
+  public void moveFor(double speed) {
     coral.set(speed);
   }
 

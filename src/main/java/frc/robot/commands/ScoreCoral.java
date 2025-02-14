@@ -26,9 +26,9 @@ public class ScoreCoral extends SequentialCommandGroup {
 
         // new InstantCommand(() -> new DriveToPose(drive, () -> new Pose2d())),
 
-        new ParallelCommandGroup(wrist.WristPose(-45),
-        new InstantCommand(()->elevator.setHeight(coralLevel))),
-        wrist.WristPose(-75)
+        new ParallelCommandGroup(wrist.WristPose(-60),
+        new InstantCommand(()->elevator.setHeight(coralLevel))).withTimeout(2),
+        wrist.WristPose(55)
 
 
     );

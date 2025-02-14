@@ -52,7 +52,7 @@ public class AlgaeSubsystem extends SubsystemBase {
     public boolean holdingAlgae(){
         double clawCurrent = claw.getStatorCurrent().getValueAsDouble();
         // System.out.println("INTAKE CURRENT: " + intakecur);
-        if (clawCurrent > 110){
+        if (clawCurrent > 100){
             return true;
         }
         return false;

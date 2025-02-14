@@ -15,7 +15,7 @@ public class Constants {
   public static final double L1 = 3.8; //TUNE ME
   public static final double L2 = 15; //TUNE ME
   public static final double L3 = 30; //TUNE ME
-  public static final double L4 = 54.5; //TUNE ME
+  public static final double L4 = 54; //TUNE ME
 
   public static final double GROUND_ALGAE = 0; //TUNE ME
   public static final double ALGAE_LOW = 20; //TUNE ME
@@ -34,8 +34,8 @@ public class Constants {
 
   public static final class WristConstants{
 
-    public static final int WRIST_ID = 22;
-    public static final double WRIST_GEAR_RATIO = 93.09;
+    public static final int WRIST_ID = 16;
+    public static final double WRIST_GEAR_RATIO = 279.27;
 
     public static final int WRIST_ENCODER_ID = 25;
   
@@ -47,9 +47,8 @@ public class Constants {
   }
 
   public static final class ClimberConstants{
-    public static final int leftClimberCanId = 15;
-    public static final int rightClimberCanId = 16;
-    public static final double motorReduction = 180.0;
+    public static final int leftClimberCanId = 15;   
+     public static final double motorReduction = 180.0;
     public static final int currentLimit = 40; 
   }
 
