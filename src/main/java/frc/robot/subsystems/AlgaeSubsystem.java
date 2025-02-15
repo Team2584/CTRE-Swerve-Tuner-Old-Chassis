@@ -36,6 +36,10 @@ public class AlgaeSubsystem extends SubsystemBase {
         return runEnd(()->setClawSpeed(-0.25),()->setClawSpeed(0)).until(()->holdingAlgae());
     }
 
+    public Command setSpeed(double speed){
+        return run(()->setClawSpeed(speed));
+    }
+
 
      /**
      * Sets the speed of the Claw motor 
@@ -51,7 +55,7 @@ public class AlgaeSubsystem extends SubsystemBase {
      */
     public boolean holdingAlgae(){
         double clawCurrent = claw.getStatorCurrent().getValueAsDouble();
-        // System.out.println("INTAKE CURRENT: " + intakecur);
+        // System.out.println("INTAKE CURRENT: " + clawCurrent);
         if (clawCurrent > 100){
             return true;
         }

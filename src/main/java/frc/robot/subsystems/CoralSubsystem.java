@@ -108,8 +108,8 @@ public class CoralSubsystem extends SubsystemBase {
     coral.set(speed);
   }
 
-  public void moveFor(double speed) {
-    coral.set(speed);
+  public Command setSpeedCommand(double speed) {
+    return run(()->setSpeed(speed));
   }
 
   public boolean hasCoral(){
