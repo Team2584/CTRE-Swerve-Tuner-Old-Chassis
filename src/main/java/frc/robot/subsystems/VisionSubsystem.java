@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
-import frc.robot.Constants.VisionConstants;
+import frc.robot.Constants.*;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,183 +18,155 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-/**
- * VisionSubsystem uses a limelight camera running MegaTag2 to update your pose estimation.
- * It reads values from NetworkTables, filters out bad pose observations, and if valid, passes
- * the vision measurement to the provided VisionConsumer.
- */
-public class VisionSubsystem {
+public class VisionSubsystem extends SubsystemBase {
 
-  // NetworkTables publishers/subscribers for the limelight/MegaTag2
+  // PER-LIMELIGHT
+  private final String[] limelightNames;
+  private final DoubleArrayPublisher[] orientationPublishers;
+  private final DoubleSubscriber[] latencySubscribers;
+  private final DoubleSubscriber[] txSubscribers;
+  private final DoubleSubscriber[] tySubscribers;
+  private final DoubleArraySubscriber[] megatag2Subscribers;
+  private final Alert[] disconnectedAlerts;
+  private final TargetObservation[] latestTargetObservations;
+  private final boolean[] connected;
+
+  // GLOBAL
   private final Supplier<Rotation2d> rotationSupplier;
-  private final DoubleArrayPublisher orientationPublisher;
-  private final DoubleSubscriber latencySubscriber;
-  private final DoubleSubscriber txSubscriber;
-  private final DoubleSubscriber tySubscriber;
-  private final DoubleArraySubscriber megatag2Subscriber;
-
-  // Consumer callback to pass along valid vision pose measurements.
   private final VisionConsumer consumer;
 
-  // Latest target observation (for servoing, etc.)
-  private TargetObservation latestTargetObservation;
-
-  // Latest inputs from NetworkTables.
-  private boolean connected;
-  private PoseObservation[] poseObservations = new PoseObservation[0];
-  private int[] tagIds = new int[0];
-
-  // Alert if the camera is disconnected.
-  private final Alert disconnectedAlert;
-
   /**
-   * Constructs the VisionSubsystem.
-   *
-   * @param limelightName    The NetworkTable name for your limelight.
-   * @param rotationSupplier A supplier for the current robot rotation (used to help MegaTag2).
-   * @param consumer         A consumer that receives valid vision pose observations.
+   * @param consumer         A callback that receives valid vision pose measurements.
+   * @param rotationSupplier A supplier for the current robot rotation.
+   * @param limelightNames   Varargs of limelight NetworkTable names.
    */
-  public VisionSubsystem(String limelightName, Supplier<Rotation2d> rotationSupplier, VisionConsumer consumer) {
-    this.rotationSupplier = rotationSupplier;
+  public VisionSubsystem(VisionConsumer consumer, Supplier<Rotation2d> rotationSupplier, String... limelightNames) {
     this.consumer = consumer;
+    this.rotationSupplier = rotationSupplier;
+    this.limelightNames = limelightNames;
 
-    var table = NetworkTableInstance.getDefault().getTable(limelightName);
-    orientationPublisher = table.getDoubleArrayTopic("robot_orientation_set").publish();
-    latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
-    txSubscriber = table.getDoubleTopic("tx").subscribe(0.0);
-    tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
-    megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+    int count = limelightNames.length;
+    orientationPublishers = new DoubleArrayPublisher[count];
+    latencySubscribers = new DoubleSubscriber[count];
+    txSubscribers = new DoubleSubscriber[count];
+    tySubscribers = new DoubleSubscriber[count];
+    megatag2Subscribers = new DoubleArraySubscriber[count];
+    disconnectedAlerts = new Alert[count];
+    latestTargetObservations = new TargetObservation[count];
+    connected = new boolean[count];
 
-    disconnectedAlert = new Alert("Vision camera is disconnected.", AlertType.kWarning);
-  }
-
-  /**
-   * Returns the target’s X angle (e.g. for simple servoing). If no observation exists, returns 0°.
-   *
-   * @return The horizontal angle to the target.
-   */
-  public Rotation2d getTargetX() {
-    return latestTargetObservation != null ? latestTargetObservation.tx() : Rotation2d.fromDegrees(0.0);
-  }
-
-  /**
-   * Call this method periodically (e.g. in Robot.periodic) to update vision inputs,
-   * process pose observations, and pass valid measurements to the consumer.
-   */
-  public void periodic() {
-    // Read and update the latest inputs from the camera.
-    updateInputs();
-
-    // Update our disconnected alert based on connection status.
-    disconnectedAlert.set(!connected);
-
-    // Loop over each pose observation and filter out invalid samples.
-    for (PoseObservation observation : poseObservations) {
-      // Reject if there are no tags, if a single tag is too ambiguous,
-      // if the Z-coordinate error is too high, or if the pose is out-of-bounds.
-      boolean rejectPose =
-          observation.tagCount() == 0 ||
-          (observation.tagCount() == 1 && observation.ambiguity() > VisionConstants.maxAmbiguity) ||
-          Math.abs(observation.pose().getZ()) > VisionConstants.maxZError ||
-          observation.pose().getX() < 0.0 ||
-          observation.pose().getX() > VisionConstants.aprilTagLayout.getFieldLength() ||
-          observation.pose().getY() < 0.0 ||
-          observation.pose().getY() > VisionConstants.aprilTagLayout.getFieldWidth();
-
-      if (rejectPose) {
-        continue;
-      }
-
-      // Calculate standard deviations based on tag distance and count.
-      double stdDevFactor = Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-      double linearStdDev = VisionConstants.linearStdDevBaseline * stdDevFactor * VisionConstants.linearStdDevMegatag2Factor;
-      double angularStdDev = VisionConstants.angularStdDevBaseline * stdDevFactor * VisionConstants.angularStdDevMegatag2Factor;
-      
-      // If you have camera-specific adjustments (for a single camera, use index 0)
-      if (VisionConstants.cameraStdDevFactors.length > 0) {
-        linearStdDev *= VisionConstants.cameraStdDevFactors[0];
-        angularStdDev *= VisionConstants.cameraStdDevFactors[0];
-      }
-
-      // Pass the valid observation to the consumer.
-      consumer.accept(
-          observation.pose().toPose2d(),
-          observation.timestamp(),
-          VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
-      );
+    for (int i = 0; i < count; i++) {
+      var table = NetworkTableInstance.getDefault().getTable(limelightNames[i]);
+      orientationPublishers[i] = table.getDoubleArrayTopic("robot_orientation_set").publish();
+      latencySubscribers[i] = table.getDoubleTopic("tl").subscribe(0.0);
+      txSubscribers[i] = table.getDoubleTopic("tx").subscribe(0.0);
+      tySubscribers[i] = table.getDoubleTopic("ty").subscribe(0.0);
+      megatag2Subscribers[i] = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+      disconnectedAlerts[i] = new Alert("Vision camera " + limelightNames[i] + " is disconnected.", AlertType.kWarning);
+      latestTargetObservations[i] = new TargetObservation(Rotation2d.fromDegrees(0.0), Rotation2d.fromDegrees(0.0));
+      connected[i] = false;
     }
   }
 
   /**
-   * Reads values from NetworkTables to update our camera inputs.
+   * Returns the target’s horizontal (tx) angle for the specified limelight.
+   *
+   * @param index The index of the limelight.
+   * @return The tx value (in degrees) as a Rotation2d.
    */
-  private void updateInputs() {
-    // Check connection status: if the latency topic hasn't updated in the last 250ms, mark as disconnected.
-    connected = ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
+  public Rotation2d getTargetX(int index) {
+    return latestTargetObservations[index] != null ? latestTargetObservations[index].tx() : Rotation2d.fromDegrees(0.0);
+  }
 
-    // Update target observation using tx and ty.
-    latestTargetObservation = new TargetObservation(
-        Rotation2d.fromDegrees(txSubscriber.get()),
-        Rotation2d.fromDegrees(tySubscriber.get())
-    );
+  @Override
+  public void periodic() {
+    int count = limelightNames.length;
+    // For each limelight, update its connection status, target observation, and publish current orientation.
+    for (int i = 0; i < count; i++) {
+      // Update connection: if "tl" hasn't updated within 250ms, mark as disconnected.
+      connected[i] = ((RobotController.getFPGATime() - latencySubscribers[i].getLastChange()) / 1000) < 250;
+      disconnectedAlerts[i].set(!connected[i]);
 
-    // Publish our current robot orientation to assist MegaTag2.
-    orientationPublisher.accept(new double[] {
-        rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0
-    });
+      // Update target observation (tx and ty)
+      double tx = txSubscribers[i].get();
+      double ty = tySubscribers[i].get();
+      latestTargetObservations[i] = new TargetObservation(Rotation2d.fromDegrees(tx), Rotation2d.fromDegrees(ty));
+        
+      // Publish current robot orientation (Used for MegaTag2)
+      double[] orientation = new double[] { rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0 };
+      orientationPublishers[i].accept(orientation);
+    }
     NetworkTableInstance.getDefault().flush();
 
-    // Read pose observations from the MegaTag2 topic.
-    Set<Integer> tagIdsSet = new HashSet<>();
-    List<PoseObservation> poseObsList = new LinkedList<>();
+    // For each limelight, process pose observations from MegaTag2.
+    for (int i = 0; i < count; i++) {
+      // Read all new samples from the MegaTag2 topic.
+      var rawSamples = megatag2Subscribers[i].readQueue();
+      Set<Integer> tagIdsSet = new HashSet<>();
+      List<PoseObservation> poseObsList = new LinkedList<>();
 
-    for (var rawSample : megatag2Subscriber.readQueue()) {
-      if (rawSample.value.length == 0) {
-        continue;
+      for (var rawSample : rawSamples) {
+        if (rawSample.value.length == 0) continue;
+
+        // Accumulate tag IDs (starting at index 11, stepping by 7)
+        for (int j = 11; j < rawSample.value.length; j += 7) {
+          tagIdsSet.add((int) rawSample.value[j]);
+        }
+        // Compute vision timestamp (rawSample.timestamp is in microseconds; rawSample.value[6] is latency in ms)
+        double visionTimestamp = rawSample.timestamp * 1e-6 - rawSample.value[6] * 1e-3;
+        // Parse raw 3D pose from the first six elements.
+        Pose3d rawPose = parsePose(rawSample.value);
+
+        poseObsList.add(new PoseObservation(
+            visionTimestamp,              // seconds
+            rawPose,
+            0.0,                // ambiguity is 0 (MegaTag2)
+            (int) rawSample.value[7],
+            rawSample.value[9]
+        ));
       }
 
-      // Accumulate tag IDs (starting at index 11, stepping by 7)
-      for (int i = 11; i < rawSample.value.length; i += 7) {
-        tagIdsSet.add((int) rawSample.value[i]);
+      // Process each pose observation.
+      for (PoseObservation observation : poseObsList) {
+        // Filtering criteria: reject if no tags, high ambiguity (for one tag), unrealistic Z, or out-of-bounds.
+        boolean rejectPose = (observation.tagCount() == 0)
+            || (observation.tagCount() == 1 && observation.ambiguity() > VisionConstants.maxAmbiguity)
+            || (Math.abs(observation.pose().getZ()) > VisionConstants.maxZError)
+            || (observation.pose().getX() < 0.0 || observation.pose().getX() > VisionConstants.aprilTagLayout.getFieldLength())
+            || (observation.pose().getY() < 0.0 || observation.pose().getY() > VisionConstants.aprilTagLayout.getFieldWidth());
+        if (rejectPose) continue;
+
+        // Compute measurement uncertainties.
+        double stdDevFactor = Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+        double linearStdDev = VisionConstants.linearStdDevBaseline * stdDevFactor * VisionConstants.linearStdDevMegatag2Factor;
+        double angularStdDev = VisionConstants.angularStdDevBaseline * stdDevFactor * VisionConstants.angularStdDevMegatag2Factor;
+        if (i < VisionConstants.cameraStdDevFactors.length) {
+          linearStdDev *= VisionConstants.cameraStdDevFactors[i];
+          angularStdDev *= VisionConstants.cameraStdDevFactors[i];
+        }
+
+        // Send the valid vision measurement to the consumer.
+        consumer.accept(
+            observation.pose().toPose2d(),
+            observation.timestamp(),
+            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
+        );
       }
-
-      // Compute vision timestamp in seconds.
-      // rawSample.timestamp is in microseconds and rawSample.value[6] is the latency in milliseconds.
-      double visionTimestamp = rawSample.timestamp * 1e-6 - rawSample.value[6] * 1e-3;
-
-      // Parse the raw 3D pose.
-      Pose3d rawPose3d = parsePose(rawSample.value);
-
-      // Add this pose observation.
-      poseObsList.add(new PoseObservation(
-          visionTimestamp,            // Calculated vision timestamp (seconds)
-          rawPose3d,                  // The raw 3D pose
-          0.0,              // Ambiguity (set to zero since MegaTag2 resolves ambiguity)
-          (int) rawSample.value[7],   // Tag count
-          rawSample.value[9]          // Average tag distance
-      ));
-    }
-
-    // Update our stored observations.
-    poseObservations = poseObsList.toArray(new PoseObservation[0]);
-    tagIds = new int[tagIdsSet.size()];
-    int i = 0;
-    for (int id : tagIdsSet) {
-      tagIds[i++] = id;
     }
   }
 
   /**
-   * LL 3D pose to botpose array.
+   * Parses a Pose3d from raw limelight botpose array.
    *
-   * @param rawLLArray The raw array from the limelight.
-   * @return A Pose3d built from the first six values of the array.
+   * @param rawLLArray The raw array from NetworkTables.
+   * @return A Pose3d built from the first six values.
    */
   private static Pose3d parsePose(double[] rawLLArray) {
     return new Pose3d(
@@ -208,16 +181,16 @@ public class VisionSubsystem {
     );
   }
 
-  /** Valid vision pose measurements. */
+  /** Functional interface for receiving valid vision pose measurements. */
   @FunctionalInterface
   public static interface VisionConsumer {
     void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs);
   }
 
-  /** Record representing a simple target observation (for servoing, etc.). */
+  /** Record representing a simple target observation (tx/ty). */
   public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
 
-  /** Record representing a full pose observation from vision. */
+  /** Record representing a vision pose observation from MegaTag2. */
   public static record PoseObservation(
       double timestamp,
       Pose3d pose,
