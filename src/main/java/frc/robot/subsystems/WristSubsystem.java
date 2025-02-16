@@ -3,11 +3,13 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import frc.robot.Constants.WristConstants;
 
-
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -26,8 +28,10 @@ public class WristSubsystem extends SubsystemBase {
 
     // Talon Init
     private final TalonFX wrist;
+    private final CANcoder wristEncoder;
 
     private static final TalonFXConfiguration wristConfig = new TalonFXConfiguration();
+    private static final CANcoderConfiguration wristEncoderConfig = new CANcoderConfiguration();
 
     private final MotionMagicVoltage m_mmReq;
 
@@ -37,6 +41,7 @@ public class WristSubsystem extends SubsystemBase {
 
     public WristSubsystem() {
         wrist = new TalonFX(WristConstants.WRIST_ID);
+        wristEncoder = new CANcoder(WristConstants.WRIST_ENCODER_ID);
 
         m_mmReq = new MotionMagicVoltage(0);
 
@@ -45,7 +50,9 @@ public class WristSubsystem extends SubsystemBase {
         posReq = new PositionVoltage(0);
 
         FeedbackConfigs fdb = wristConfig.Feedback;
-        fdb.SensorToMechanismRatio = WristConstants.WRIST_GEAR_RATIO; // X motor rotations per mechanism rotation
+        fdb.FeedbackRemoteSensorID = wristEncoder.getDeviceID();
+        fdb.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        fdb.RotorToSensorRatio = WristConstants.WRIST_GEAR_RATIO; // X motor rotations per mechanism rotation
 
             /* Configure Motion Magic */
         MotionMagicConfigs mm = wristConfig.MotionMagic;
@@ -69,8 +76,7 @@ public class WristSubsystem extends SubsystemBase {
         slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
         wrist.getConfigurator().apply(wristConfig,0.25);
-
-        wrist.setPosition(-0.25);
+        
 
     }
 
