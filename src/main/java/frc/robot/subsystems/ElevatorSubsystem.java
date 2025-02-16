@@ -35,7 +35,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableDashboardNumber;
 
@@ -137,12 +136,6 @@ public class ElevatorSubsystem extends SubsystemBase{
     setpoint = heightInches;
     leader.setControl(motionProfileReq.withPosition(inchesToRotations(heightInches)));
   }
-
-  public Command moveToHeight(double heightInches){
-    setpoint = heightInches;
-    return runOnce(()->leader.setControl(motionProfileReq.withPosition(inchesToRotations(heightInches))));
-  }
-  
 
   /**
   * Sets the climb Motors to run at a specified voltage
