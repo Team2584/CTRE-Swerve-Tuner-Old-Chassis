@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -17,27 +18,27 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
 
-public class GoToNeutral extends SequentialCommandGroup {
+public class NetAlgae extends SequentialCommandGroup {
+    private ElevatorSubsystem elevator;
+    private WristSubsystem wrist;
+    private AlgaeSubsystem algae;
 
-  public GoToNeutral(ElevatorSubsystem elevator, WristSubsystem wrist, AlgaeSubsystem algae) {
-
-    addRequirements(wrist, algae, elevator);
-
-    addCommands(
-
-        // new InstantCommand(() -> new DriveToPose(drive, () -> new Pose2d())),
+    public NetAlgae(RobotContainer robotContainer) {
+        this.elevator = robotContainer.getElevator();
+        this.wrist = robotContainer.getWrist();
+        this.algae = robotContainer.getAlgaeMech();
         
-   
-        new InstantCommand(()->elevator.setHeight(0)),
-        new InstantCommand(()-> algae.setClawSpeed(0)),
-        wrist.WristPose(-90)
 
 
+        addCommands(
 
+            new ParallelCommandGroup(
+                wrist.WristPose(-60),
+                elevator.moveToHeight(Constants.ElevatorConstants.NET)
+                ).withTimeout(1)
 
+        );
 
-    );
-    
-  }
+    }
 
 }
