@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 public class Telemetry {
     private final double MaxSpeed;
     private Rotation2d heading;
+    private Pose2d pose;
 
     /**
      * Construct a telemetry object, with the specified max speed of the robot
@@ -89,7 +90,7 @@ public class Telemetry {
         /* Telemeterize the pose */
 
         
-        Pose2d pose = state.Pose;
+        pose = state.Pose;
         fieldTypePub.set("Field2d");
         fieldPub.set(new double[] {
             pose.getX(),
@@ -125,5 +126,9 @@ public class Telemetry {
 
     public Rotation2d getHeading(){
         return heading;
+    }
+
+    public Pose2d getPose(){
+        return pose;
     }
 }

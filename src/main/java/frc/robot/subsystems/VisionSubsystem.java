@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -33,10 +34,12 @@ public class VisionSubsystem extends SubsystemBase {
   private final DoubleSubscriber[] latencySubscribers;
   private final DoubleSubscriber[] txSubscribers;
   private final DoubleSubscriber[] tySubscribers;
+  private final DoubleSubscriber[] taSubscribers;
   private final DoubleArraySubscriber[] megatag2Subscribers;
   private final Alert[] disconnectedAlerts;
   private final TargetObservation[] latestTargetObservations;
   private final boolean[] connected;
+  private final Integer[] primaryTagIds;
 
   // GLOBAL
   private final Supplier<Rotation2d> rotationSupplier;
@@ -57,10 +60,12 @@ public class VisionSubsystem extends SubsystemBase {
     latencySubscribers = new DoubleSubscriber[count];
     txSubscribers = new DoubleSubscriber[count];
     tySubscribers = new DoubleSubscriber[count];
+    taSubscribers = new DoubleSubscriber[count];
     megatag2Subscribers = new DoubleArraySubscriber[count];
     disconnectedAlerts = new Alert[count];
     latestTargetObservations = new TargetObservation[count];
     connected = new boolean[count];
+    primaryTagIds = new Integer[count];
 
     for (int i = 0; i < count; i++) {
       var table = NetworkTableInstance.getDefault().getTable(limelightNames[i]);
@@ -68,10 +73,12 @@ public class VisionSubsystem extends SubsystemBase {
       latencySubscribers[i] = table.getDoubleTopic("tl").subscribe(0.0);
       txSubscribers[i] = table.getDoubleTopic("tx").subscribe(0.0);
       tySubscribers[i] = table.getDoubleTopic("ty").subscribe(0.0);
+      taSubscribers[i] = table.getDoubleTopic("ta").subscribe(0.0);
       megatag2Subscribers[i] = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
       disconnectedAlerts[i] = new Alert("Vision camera " + limelightNames[i] + " is disconnected.", AlertType.kWarning);
       latestTargetObservations[i] = new TargetObservation(Rotation2d.fromDegrees(0.0), Rotation2d.fromDegrees(0.0));
       connected[i] = false;
+      primaryTagIds[i] = null;
     }
   }
 
@@ -85,6 +92,14 @@ public class VisionSubsystem extends SubsystemBase {
     return latestTargetObservations[index] != null ? latestTargetObservations[index].tx() : Rotation2d.fromDegrees(0.0);
   }
 
+  public Optional<Integer> getPrimaryTagId(int cameraIndex) {
+    if (cameraIndex < 0 || cameraIndex >= primaryTagIds.length) {
+        return Optional.empty();
+    }
+    return Optional.ofNullable(primaryTagIds[cameraIndex]);
+}
+
+
   @Override
   public void periodic() {
     int count = limelightNames.length;
@@ -97,6 +112,7 @@ public class VisionSubsystem extends SubsystemBase {
       // Update target observation (tx and ty)
       double tx = txSubscribers[i].get();
       double ty = tySubscribers[i].get();
+      double ta = taSubscribers[i].get();
       latestTargetObservations[i] = new TargetObservation(Rotation2d.fromDegrees(tx), Rotation2d.fromDegrees(ty));
 
       // Publish current robot orientation (Used for MegaTag2)
@@ -112,13 +128,24 @@ public class VisionSubsystem extends SubsystemBase {
       Set<Integer> tagIdsSet = new HashSet<>();
       List<PoseObservation> poseObsList = new LinkedList<>();
 
+      Integer bestTagId = null;
+      double bestArea = 0;
+
       for (var rawSample : rawSamples) {
         if (rawSample.value.length == 0) continue;
 
         // Accumulate tag IDs (starting at index 11, stepping by 7)
         for (int j = 11; j < rawSample.value.length; j += 7) {
           tagIdsSet.add((int) rawSample.value[j]);
+
+          int tagId = (int) rawSample.value[j];
+          double area = rawSample.value[j + 1]; // TA is assumed to be at offset 1 in the block.
+          if (area > bestArea) {
+            bestArea = area;
+            bestTagId = tagId;
+          }
         }
+        
         // Compute vision timestamp (rawSample.timestamp is in microseconds; rawSample.value[6] is latency in ms)
         double visionTimestamp = rawSample.timestamp * 1e-6 - rawSample.value[6] * 1e-3;
         // Parse raw 3D pose from the first six elements.
@@ -131,6 +158,12 @@ public class VisionSubsystem extends SubsystemBase {
             (int) rawSample.value[7],
             rawSample.value[9]
         ));
+      }
+
+      if (bestTagId != null) {
+        primaryTagIds[i] = bestTagId;
+      } else {
+        primaryTagIds[i] = null;
       }
 
       // Process each pose observation.
