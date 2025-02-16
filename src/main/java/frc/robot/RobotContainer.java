@@ -27,6 +27,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -35,10 +36,7 @@ import static frc.robot.Constants.*;
 import static frc.robot.Constants.ElevatorConstants.*;
 
 import frc.robot.commands.*;
-import frc.robot.commands.NeutralAlgae;
-import frc.robot.commands.PickupReefAlgae;
-import frc.robot.commands.ScoreCoral;
-
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commandgroup.*;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -93,6 +91,16 @@ public class RobotContainer {
     return new ClimberSubsystem();
   }
 
+  private VisionSubsystem buildVisionSubsystem(){
+    return new VisionSubsystem(
+      drivetrain::addVisionMeasurement,
+      logger::getHeading,
+
+      // Limelight NetworkTable names
+      VisionConstants.camera0Name,
+      VisionConstants.camera1Name);
+  }
+
   public CommandSwerveDrivetrain getDrivetrain(){
     return drivetrain;
   }
@@ -120,6 +128,10 @@ public class RobotContainer {
   public CommandXboxController getJoystick(){
     return joystick;
   }
+
+  public VisionSubsystem getVision(){
+    return vision;
+  }
   
   
   private final AlgaeSubsystem algae = buildAlgaeMech();
@@ -127,6 +139,7 @@ public class RobotContainer {
   private final WristSubsystem wrist = buildWrist();
   private final ElevatorSubsystem elevator = buildElevatorSubsystem();
   private final ClimberSubsystem climber = buildClimberSubsystem();
+  private final VisionSubsystem vision = buildVisionSubsystem();
 
   // Map buttons to trigger variables
   private final JoystickButton redL4 = new JoystickButton(buttonBoard, 5);

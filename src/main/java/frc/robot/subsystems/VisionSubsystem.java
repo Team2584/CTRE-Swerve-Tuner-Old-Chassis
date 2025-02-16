@@ -98,7 +98,7 @@ public class VisionSubsystem extends SubsystemBase {
       double tx = txSubscribers[i].get();
       double ty = tySubscribers[i].get();
       latestTargetObservations[i] = new TargetObservation(Rotation2d.fromDegrees(tx), Rotation2d.fromDegrees(ty));
-        
+
       // Publish current robot orientation (Used for MegaTag2)
       double[] orientation = new double[] { rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0 };
       orientationPublishers[i].accept(orientation);
