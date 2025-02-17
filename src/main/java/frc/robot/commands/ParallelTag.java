@@ -36,7 +36,7 @@ public class ParallelTag extends Command {
     this.translationX = translationX;
     this.translationY = translationY;
 
-    pid = new PIDController(0.2, 0.0, 0.0);
+    pid = new PIDController(6, 0.0, 0.0);
     pid.setSetpoint(0.0); // Diff between actual and target heading should be 0
     addRequirements(drivetrain, vision);
   }

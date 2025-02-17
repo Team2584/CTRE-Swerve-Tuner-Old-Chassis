@@ -261,6 +261,15 @@ public class RobotContainer {
     joystick.rightTrigger().whileTrue(new ParallelCommandGroup(coral.shootCoral(), algae.outtakeCommand()));
 
     joystick.leftTrigger().whileTrue(new driveWithSpeed(drivetrain,joystick,0.2));
+    joystick.leftBumper().whileTrue(
+      new ParallelTag(
+          drivetrain,
+          vision,
+          logger,
+          () -> -joystick.getLeftY() * MaxSpeed * governor,
+          () -> -joystick.getLeftX() * MaxSpeed * governor
+      )
+    );
 
     joystick.povRight().whileTrue(climber.lowerRobot());
     joystick.povLeft().whileTrue(climber.liftRobot());
