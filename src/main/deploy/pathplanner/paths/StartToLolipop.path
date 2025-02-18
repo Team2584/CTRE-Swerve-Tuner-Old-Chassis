@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.2,
-        "y": 4.0
+        "x": 7.6,
+        "y": 5.85
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.481178170587177,
-        "y": 4.396244910598695
+        "x": 7.35,
+        "y": 5.85
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.498,
-        "y": 4.838
+        "x": 1.9,
+        "y": 5.85
       },
       "prevControl": {
-        "x": 6.577557694943757,
-        "y": 4.840379051202302
+        "x": 2.7498281657194963,
+        "y": 5.85
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,19 +33,19 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
+    "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
-    "maxAngularVelocity": 180.0,
-    "maxAngularAcceleration": 500.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "CloseMiddleCoral&Algae",
+  "folder": "Lolipop1",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

@@ -30,7 +30,7 @@ public class IntakeCoral extends SequentialCommandGroup {
                 new ParallelCommandGroup(
                         elevator.moveToHeight(HOME),
                         coral.intakeCoral(),
-                        wrist.WristPose(-70)).until(()->coral.hasCoral())
+                        wrist.WristPose(-70)).until(()->coral.safeCoral())
 
         );
 

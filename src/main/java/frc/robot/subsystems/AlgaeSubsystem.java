@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class AlgaeSubsystem extends SubsystemBase {
@@ -25,7 +26,7 @@ public class AlgaeSubsystem extends SubsystemBase {
      * Resets speed to zero when not being called.
      */
     public Command outtakeCommand(){
-        return runEnd(()->setClawSpeed(0.25),()->setClawSpeed(0));
+        return runEnd(()->setClawSpeed(0.5),()->setClawSpeed(0));
     }
 
     /**
@@ -55,6 +56,9 @@ public class AlgaeSubsystem extends SubsystemBase {
      */
     public boolean holdingAlgae(){
         double clawCurrent = claw.getStatorCurrent().getValueAsDouble();
+        double clawSpeed = claw.getVelocity().getValueAsDouble();
+        SmartDashboard.putNumber("Algae Current",clawCurrent);
+        SmartDashboard.putNumber("Algae Speed",clawSpeed);
         // System.out.println("INTAKE CURRENT: " + clawCurrent);
         if (clawCurrent > 100){
             return true;

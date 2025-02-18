@@ -7,7 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "MiddleStart"
+            "pathName": "MiddleStartCoral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "liftL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "approachCoralScore"
           }
         },
         {
@@ -17,33 +35,9 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Score MidAlgae"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BargeToAlgae2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Score Algae2"
+            "name": "scoreL4"
           }
         }
       ]

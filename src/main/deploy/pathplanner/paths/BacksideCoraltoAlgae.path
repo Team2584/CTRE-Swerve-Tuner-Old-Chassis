@@ -3,25 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.663,
-        "y": 4.811
+        "x": 3.18,
+        "y": 3.854
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.5784123287459595,
-        "y": 4.437468072044978
+        "x": 2.9354867626774173,
+        "y": 3.9060891233755224
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.211465807105156,
-        "y": 5.223
+        "x": 2.7835851862287826,
+        "y": 3.9265171182068968
       },
       "prevControl": {
-        "x": 6.3319492043885175,
-        "y": 4.976883842286052
+        "x": 2.549800986462823,
+        "y": 3.837945407487335
+      },
+      "nextControl": {
+        "x": 3.0173693859947424,
+        "y": 4.015088828926455
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.916516884775129,
+        "y": 3.989
+      },
+      "prevControl": {
+        "x": 3.165563537190609,
+        "y": 4.010812036141612
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,19 +47,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "secondAlgaePickup",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "pickupAlgae"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -54,10 +58,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "BackMidCoral&Algae",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

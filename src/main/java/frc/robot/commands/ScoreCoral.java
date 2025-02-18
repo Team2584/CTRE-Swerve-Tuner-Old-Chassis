@@ -22,7 +22,7 @@ public class ScoreCoral extends SequentialCommandGroup {
 
         new ParallelCommandGroup(
           new InstantCommand(()->elevator.setHeight(coralLevel))).withTimeout(1),
-          wrist.WristPose(-66)
+          wrist.WristPose(-68)
 
 
     );

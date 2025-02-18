@@ -20,6 +20,8 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -70,7 +72,7 @@ public class WristSubsystem extends SubsystemBase {
         slot0.kS = 0.3; // Add 0.25 V output to overcome static friction
         slot0.kV = 0.1; // A velocity target of 1 rps results in 0.12 V output
         slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-        slot0.kP = 33; // A position error of 0.2 rotations results in 12 V output
+        slot0.kP = 45; // A position error of 0.2 rotations results in 12 V output
         slot0.kI = 0; // No output for integrated error
         slot0.kD = 0.8; // A velocity error of 1 rps results in 0.5 V output
         slot0.GravityType = GravityTypeValue.Arm_Cosine;
@@ -120,6 +122,7 @@ public class WristSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("wristAngle", Units.rotationsToDegrees(wrist.getPosition().getValueAsDouble()));
         // System.out.println("Wrist Position: " + wrist.getPosition().getValueAsDouble());
 
     }

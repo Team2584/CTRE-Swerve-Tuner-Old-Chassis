@@ -6,9 +6,11 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -35,10 +37,6 @@ import static frc.robot.Constants.*;
 import static frc.robot.Constants.ElevatorConstants.*;
 
 import frc.robot.commands.*;
-import frc.robot.commands.NeutralAlgae;
-import frc.robot.commands.PickupReefAlgae;
-import frc.robot.commands.ScoreCoral;
-
 import frc.robot.commandgroup.*;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -122,26 +120,49 @@ public class RobotContainer {
   }
   
   
-  private final AlgaeSubsystem algae = buildAlgaeMech();
-  private final CoralSubsystem coral = buildCoralMech();
-  private final WristSubsystem wrist = buildWrist();
-  private final ElevatorSubsystem elevator = buildElevatorSubsystem();
-  private final ClimberSubsystem climber = buildClimberSubsystem();
+  private final AlgaeSubsystem algae;
+  private final CoralSubsystem coral;
+  private final WristSubsystem wrist;
+  private final ElevatorSubsystem elevator;
+  private final ClimberSubsystem climber;
 
   // Map buttons to trigger variables
-  private final JoystickButton redL4 = new JoystickButton(buttonBoard, 5);
-  private final JoystickButton redL3 = new JoystickButton(buttonBoard, 6);
-  private final JoystickButton redL2 = new JoystickButton(buttonBoard, 7);
-  private final JoystickButton redL1 = new JoystickButton(buttonBoard, 8);
+  private final JoystickButton redL4 = new JoystickButton(buttonBoard, 1);
+  private final JoystickButton redL3 = new JoystickButton(buttonBoard, 2);
+  private final JoystickButton redL2 = new JoystickButton(buttonBoard, 3);
+  private final JoystickButton redL1 = new JoystickButton(buttonBoard, 4);
 
-  private final JoystickButton blue4 = new JoystickButton(buttonBoard, 9);
-  private final JoystickButton blue3 = new JoystickButton(buttonBoard, 10);
-  private final JoystickButton blue2 = new JoystickButton(buttonBoard, 11);
-  private final JoystickButton blue1 = new JoystickButton(buttonBoard, 12);
+  private final JoystickButton blue4 = new JoystickButton(buttonBoard, 5);
+  private final JoystickButton blue3 = new JoystickButton(buttonBoard, 6);
+  private final JoystickButton blue2 = new JoystickButton(buttonBoard, 7);
+  private final JoystickButton blue1 = new JoystickButton(buttonBoard, 8);
 
+  
   public RobotContainer() {
 
+    algae = buildAlgaeMech();
+    coral = buildCoralMech(); 
+    wrist = buildWrist();
+    elevator = buildElevatorSubsystem();
+    climber = buildClimberSubsystem();
+
+    NamedCommands.registerCommand("netAlgae", new NetAlgae(this).withTimeout(1));
+    NamedCommands.registerCommand("wrist60Deg", wrist.WristPose(-60).withTimeout(0.3));
+    NamedCommands.registerCommand("shootAlgae", algae.outtakeCommand());
+    NamedCommands.registerCommand("liftLowAlgae", new PickupReefAlgaeState(this,ALGAE_LOW).withTimeout(1));
+    NamedCommands.registerCommand("algaeNeutral", new NeutralAlgae(this).withTimeout(1));
+    NamedCommands.registerCommand("liftL4", new ScoreCoralState(this,L4).withTimeout(0.5));
+    NamedCommands.registerCommand("liftL3", new ScoreCoralState(this,L3).withTimeout(0.3));
+    NamedCommands.registerCommand("scoreCoral", coral.shootCoral().withTimeout(0.3));
+    NamedCommands.registerCommand("liftHighAlgae", new PickupReefAlgaeState(this,ALGAE_HIGH).withTimeout(1));
+    NamedCommands.registerCommand("liftNet", new NetAlgae(this));
+    NamedCommands.registerCommand("scoreNet", algae.outtakeCommand().withTimeout(0.3));
+    NamedCommands.registerCommand("neutral", new NeutralState(this).withTimeout(0.5));
+    NamedCommands.registerCommand("pickupLolipop", new PickupReefAlgae(elevator,wrist,algae,GROUND_ALGAE,0).withTimeout(1));
+    
+
     autoChooser = AutoBuilder.buildAutoChooser("line");
+
 
     SmartDashboard.putData("Auto Mode", autoChooser);
     SmartDashboard.putData("Field", m_field);
@@ -177,11 +198,15 @@ public class RobotContainer {
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
-    // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    // redL4.whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    // redL3.whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    // redL2.whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    // redL1.whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
+    joystick.povUp().onTrue(new InstantCommand(()->SignalLogger.start()).andThen(()->SmartDashboard.putNumber("On", 1)));
+    joystick.povDown().onTrue(new InstantCommand(()->SignalLogger.stop()).andThen(()->SmartDashboard.putNumber("On", 0)));
+    
+    
     // reset the field-centric heading on left bumper press
     // joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
@@ -251,6 +276,8 @@ public class RobotContainer {
 
     joystick.povRight().whileTrue(climber.lowerRobot());
     joystick.povLeft().whileTrue(climber.liftRobot());
+
+    
 
 
 

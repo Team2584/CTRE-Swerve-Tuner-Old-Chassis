@@ -29,6 +29,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.math.util.Units.*;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -211,6 +213,11 @@ public class ElevatorSubsystem extends SubsystemBase{
     return rotations * (Math.PI * ElevatorConstants.ELEVATOR_PULLEY_PITCH_DIAMETER);
   }
 
+  @Override
+  public void periodic() {
+      SmartDashboard.putNumber("Elevator Position", rotationsToInches(leader.getPosition().getValueAsDouble()));
+      // This method will be called once per scheduler run
+  }
   
   
 }

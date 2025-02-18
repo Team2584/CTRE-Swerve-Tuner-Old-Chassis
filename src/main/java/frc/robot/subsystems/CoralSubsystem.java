@@ -34,6 +34,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -50,6 +52,8 @@ public class CoralSubsystem extends SubsystemBase {
   /* Hardware */
   private final TalonFX coral;
   private final CANrange coralSensor;
+  private final DigitalInput elevatorCoral;
+
 
   /* Configs */
   private static final TalonFXConfiguration coralConfigs = new TalonFXConfiguration();
@@ -61,6 +65,8 @@ public class CoralSubsystem extends SubsystemBase {
   public CoralSubsystem() {
     this.coral = new TalonFX(CoralMechConstants.CORAL_MECH_ID);
     this.coralSensor = new CANrange(CoralMechConstants.CORAL_SENSOR_ID);
+
+    elevatorCoral = new DigitalInput(0);
 
     vreq = new PositionVoltage(0);
 
@@ -98,7 +104,7 @@ public class CoralSubsystem extends SubsystemBase {
    * Resets speed to zero when holding a Coral or when not being called.
    */
   public Command intakeCoral(){
-    return runEnd(() -> setSpeed(0.2), () -> setSpeed(0)).until(()->hasCoral()).andThen(()->coral.setControl(vreq.withPosition(coral.getPosition().getValueAsDouble() + 3.75)));
+    return runEnd(() -> setSpeed(0.2), () -> setSpeed(0)).until(()->safeCoral());
   }
   
   /**
@@ -106,6 +112,10 @@ public class CoralSubsystem extends SubsystemBase {
   */
   public void setSpeed(double speed) {
     coral.set(speed);
+  }
+
+  public boolean coralCleared(){
+    return !elevatorCoral.get(); // Returns True if obstructed
   }
 
   public Command setSpeedCommand(double speed) {
@@ -121,15 +131,22 @@ public class CoralSubsystem extends SubsystemBase {
     }
   }
 
-  public boolean hasCoralDelayed(){
-    if (coralSensor.getDistance().getValueAsDouble() < 0.09){
-      runOnce(()->new WaitCommand(0.5));
+  public boolean safeCoral(){
+    if (hasCoral() && !coralCleared()){
       return true;
     }
     else{
       return false;
     }
   }
+
+  @Override
+    public void periodic() {
+        SmartDashboard.putBoolean("Coral Cleared", coralCleared());
+        // This method will be called once per scheduler run
+    }
+
+  
 
  
 }
