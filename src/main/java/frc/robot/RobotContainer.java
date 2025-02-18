@@ -100,8 +100,7 @@ public class RobotContainer {
       logger::getHeading,
 
       // Limelight NetworkTable names
-      VisionConstants.camera0Name,
-      VisionConstants.camera1Name);
+      VisionConstants.camera0Name);
   }
 
   public CommandSwerveDrivetrain getDrivetrain(){

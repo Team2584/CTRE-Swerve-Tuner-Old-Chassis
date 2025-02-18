@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants.*;
-
+import frc.robot.LimelightHelpers;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +18,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -118,6 +121,7 @@ public class VisionSubsystem extends SubsystemBase {
       // Publish current robot orientation (Used for MegaTag2)
       double[] orientation = new double[] { rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0 };
       orientationPublishers[i].accept(orientation);
+      // LimelightHelpers.SetRobotOrientation(limelightNames[count], rotationSupplier.get().getDegrees(), 0, 0, 0, 0, 0);
     }
     NetworkTableInstance.getDefault().flush();
 
@@ -136,7 +140,7 @@ public class VisionSubsystem extends SubsystemBase {
 
         // Accumulate tag IDs (starting at index 11, stepping by 7)
         for (int j = 11; j < rawSample.value.length; j += 7) {
-          tagIdsSet.add((int) rawSample.value[j]);
+          tagIdsSet.add((int) rawSample.value[j]);         
 
           int tagId = (int) rawSample.value[j];
           double area = rawSample.value[j + 1]; // TA is assumed to be at offset 1 in the block.
@@ -145,7 +149,7 @@ public class VisionSubsystem extends SubsystemBase {
             bestTagId = tagId;
           }
         }
-        
+
         // Compute vision timestamp (rawSample.timestamp is in microseconds; rawSample.value[6] is latency in ms)
         double visionTimestamp = rawSample.timestamp * 1e-6 - rawSample.value[6] * 1e-3;
         // Parse raw 3D pose from the first six elements.

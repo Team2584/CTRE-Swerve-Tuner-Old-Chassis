@@ -65,8 +65,8 @@ public class Constants {
       AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
   // Camera names, must match names configured
-  public static String camera0Name = "LL_0";
-  public static String camera1Name = "LL_1";
+  public static String camera0Name = "limelight-zero";
+  public static String camera1Name = "limelight-one";
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
