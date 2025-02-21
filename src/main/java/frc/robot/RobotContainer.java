@@ -30,6 +30,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.RampSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.AlgaeSubsystem;
@@ -93,6 +94,9 @@ public class RobotContainer {
   private ClimberSubsystem buildClimberSubsystem() {
     return new ClimberSubsystem();
   }
+  private RampSubsystem buildRampSubsystem() {
+    return new RampSubsystem();
+  }
 
   private VisionSubsystem buildVisionSubsystem(){
     return new VisionSubsystem(
@@ -127,6 +131,10 @@ public class RobotContainer {
     return climber;
   }
 
+  public RampSubsystem getRamp() {
+    return ramp;
+  }
+
   public CommandXboxController getJoystick(){
     return joystick;
   }
@@ -141,6 +149,7 @@ public class RobotContainer {
   private final WristSubsystem wrist;
   private final ElevatorSubsystem elevator;
   private final ClimberSubsystem climber;
+  private final RampSubsystem ramp;
   private final VisionSubsystem vision;
 
 
@@ -164,6 +173,7 @@ public class RobotContainer {
     wrist = buildWrist();
     elevator = buildElevatorSubsystem();
     climber = buildClimberSubsystem();
+    ramp = buildRampSubsystem();
     vision = buildVisionSubsystem();
 
     //Pathplanner Named Commands (MUST BE DECLARED HERE AND HAVE THE SAME NAME)
@@ -180,6 +190,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("scoreNet", algae.outtakeCommand().withTimeout(0.3));
     NamedCommands.registerCommand("neutral", new NeutralState(this).withTimeout(0.5));
     NamedCommands.registerCommand("pickupLolipop", new PickupReefAlgae(elevator,wrist,algae,GROUND_ALGAE,0).withTimeout(1));
+    NamedCommands.registerCommand("intakeCoral", coral.intakeCoral());
     
 
     autoChooser = AutoBuilder.buildAutoChooser("line");
@@ -223,117 +234,89 @@ public class RobotContainer {
     // redL3.whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
     // redL2.whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
     // redL1.whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-    joystick.povUp().onTrue(new InstantCommand(()->SignalLogger.start()).andThen(()->SmartDashboard.putNumber("On", 1)));
-    joystick.povDown().onTrue(new InstantCommand(()->SignalLogger.stop()).andThen(()->SmartDashboard.putNumber("On", 0)));
     
     
     // reset the field-centric heading on left bumper press
     // joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-    redL4.onTrue(
-      new ScoreCoralState(this,L4)).onFalse(new NeutralState(this)
-    );
-    redL3.onTrue(
-      new ScoreCoralState(this,L3)).onFalse(new NeutralState(this)
-    );
-    redL2.onTrue(
-      new ScoreCoralState(this,L2)).onFalse(new NeutralState(this)
-    );
-    redL1.onTrue(
-      new ScoreCoralState(this,L1)).onFalse(new NeutralState(this)
-    );
+    /* MICHAEL WAY OF CORAL */
+    joystick.rightBumper().and(joystick.povRight()).onTrue(new ScoreCoralState(this,L4)).onFalse(new NeutralState(this)).onFalse(new NeutralState(this));
+    joystick.rightTrigger().and(joystick.povRight()).onTrue(new ScoreCoralState(this,L3)).onFalse(new NeutralState(this)).onFalse(new NeutralState(this));
+    joystick.leftBumper().and(joystick.povRight()).onTrue(new ScoreCoralState(this,L2)).onFalse(new NeutralState(this)).onFalse(new NeutralState(this));
+    joystick.leftTrigger().and(joystick.povRight()).onTrue(new ScoreCoralState(this,L1)).onFalse(new NeutralState(this)).onFalse(new NeutralState(this));
+
+
+    /* Michael Way of Algae */
+    joystick.rightBumper().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,NET)).onFalse(new NeutralState(this));
+    joystick.rightTrigger().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,ALGAE_HIGH)).onFalse(new NeutralState(this));
+    joystick.leftBumper().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,ALGAE_LOW)).onFalse(new NeutralState(this));
+    joystick.leftTrigger().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,GROUND_ALGAE)).onFalse(new NeutralState(this));
+    
+
+
+    /* RUSH WAY OF CORAL */
     // redL4.onTrue(
-    //     new ScoreCoral(elevator, wrist, coral, L4)).onFalse(new InstantCommand(() -> elevator.setHeight(0)));
+    //   new ScoreCoralState(this,L4)).onFalse(new NeutralState(this)
+    // );
     // redL3.onTrue(
-    //     new ScoreCoral(elevator, wrist, coral, L3)).onFalse(new InstantCommand(() -> elevator.setHeight(0)));
+    //   new ScoreCoralState(this,L3)).onFalse(new NeutralState(this)
+    // );
     // redL2.onTrue(
-    //     new ScoreCoral(elevator, wrist, coral, L2)).onFalse(new InstantCommand(() -> elevator.setHeight(0)));
+    //   new ScoreCoralState(this,L2)).onFalse(new NeutralState(this)
+    // );
     // redL1.onTrue(
-    //     new ScoreCoral(elevator, wrist, coral, L1)).onFalse(new InstantCommand(() -> elevator.setHeight(0)));
+    //   new ScoreCoralState(this,L1)).onFalse(new NeutralState(this)
+    // );
+   
 
-    blue4.onTrue(
-        new NetAlgae(this)).onFalse(new NeutralState(this));
+    /* RUSH WAY OF ALGAE */
+    // blue4.onTrue(
+    //     new NetAlgae(this)).onFalse(new NeutralState(this));
 
-    blue3.onTrue(
-        new PickupReefAlgaeState(this,ALGAE_HIGH).until(() -> algae.holdingAlgae())
-            .finallyDo(()->new NeutralAlgae(this)))
-        .onFalse(new NeutralAlgae(this));
+    // blue3.onTrue(
+    //     new PickupReefAlgaeState(this,ALGAE_HIGH).until(() -> algae.holdingAlgae())
+    //         .finallyDo(()->new NeutralAlgae(this)))
+    //     .onFalse(new NeutralAlgae(this));
 
-    blue2.onTrue(
-        new PickupReefAlgaeState(this,ALGAE_LOW).until(() -> algae.holdingAlgae())
-          .finallyDo(()->new NeutralAlgae(this)))
-        .onFalse(new NeutralAlgae(this));
+    // blue2.onTrue(
+    //     new PickupReefAlgaeState(this,ALGAE_LOW).until(() -> algae.holdingAlgae())
+    //       .finallyDo(()->new NeutralAlgae(this)))
+    //     .onFalse(new NeutralAlgae(this));
 
-    blue1.onTrue(
-        new PickupReefAlgae(elevator,wrist,algae,GROUND_ALGAE,30).until(() -> algae.holdingAlgae())
-          .finallyDo(()->new NeutralAlgae(this)))
-        .onFalse(new NeutralAlgae(this));
+    // blue1.onTrue(
+    //     new PickupReefAlgae(elevator,wrist,algae,GROUND_ALGAE,30).until(() -> algae.holdingAlgae())
+    //       .finallyDo(()->new NeutralAlgae(this)))
+    //     .onFalse(new NeutralAlgae(this));
 
-    // joystick.leftTrigger().whileTrue(new InstantCommand(() ->
-    // elevator.setHeight(ElevatorConstants.L3)));
-    // joystick.leftTrigger().whileTrue(new InstantCommand(() ->
-    // elevator.setHeight(ElevatorConstants.L3)));
-    // joystick.leftTrigger().whileTrue(new InstantCommand(() ->
-    // elevator.setHeight(ElevatorConstants.L3)));
+ 
 
-    // joystick.leftBumper().onTrue(new
-    // ScoreCoral(elevator,wrist,coral,L1)).onFalse(new
-    // InstantCommand(()->elevator.setHeight(0)));
-    // joystick.leftTrigger().onTrue(new
-    // ScoreCoral(elevator,wrist,coral,L2)).onFalse(new
-    // InstantCommand(()->elevator.setHeight(0)));
-    // joystick.rightBumper().onTrue(new
-    // ScoreCoral(elevator,wrist,coral,L3)).onFalse(new
-    // InstantCommand(()->elevator.setHeight(0)));
-    // joystick.rightTrigger().onTrue(new
-    // ScoreCoral(elevator,wrist,coral,L4)).onFalse(new
-    // InstantCommand(()->elevator.setHeight(0)));
 
-    joystick.rightBumper().onTrue(new IntakeCoral(this));
-    joystick.rightTrigger().whileTrue(new ParallelCommandGroup(coral.shootCoral(), algae.outtakeCommand()));
+    // joystick.rightBumper().onTrue(new IntakeCoral(this)); // RUSH WAY OF INTAKE
+    // joystick.rightTrigger().whileTrue(new ParallelCommandGroup(coral.shootCoral(), algae.outtakeCommand())); // RUSH WAY OF OUTTAKE
+    
+    joystick.x().onTrue(new IntakeCoral(this)); // RUSH WAY OF INTAKE
+    joystick.a().whileTrue(new ParallelCommandGroup(coral.shootCoral(), algae.outtakeCommand())); // RUSH WAY OF OUTTAKE
 
-    joystick.leftTrigger().whileTrue(new driveWithSpeed(drivetrain,joystick,0.2));
-    joystick.leftBumper().whileTrue(
-      new ParallelTag(
-          drivetrain,
-          vision,
-          logger,
-          () -> -joystick.getLeftY() * MaxSpeed * governor,
-          () -> -joystick.getLeftX() * MaxSpeed * governor
-      )
-    );
+    // joystick.leftTrigger().whileTrue(new driveWithSpeed(drivetrain,joystick,0.2)); // Slow Mode
+    // joystick.leftBumper().whileTrue(
+    //   new ParallelTag(
+    //       drivetrain,
+    //       vision,
+    //       logger,
+    //       () -> -joystick.getLeftY() * MaxSpeed * governor,
+    //       () -> -joystick.getLeftX() * MaxSpeed * governor
+    //   )
+    // );
 
-    joystick.povRight().whileTrue(climber.lowerRobot());
-    joystick.povLeft().whileTrue(climber.liftRobot());
+    // joystick.povRight().whileTrue(climber.lowerRobot()); // Lower Climb
+    // joystick.povLeft().whileTrue(climber.liftRobot()); // Lift Climb
+
+    // joystick.povUp().onTrue(ramp.liftRamp()); // Ramp Up Control
+    // joystick.povDown().onTrue(ramp.lowerRamp()); // Ramp Down Control
 
     
 
 
-
-    // joystick.povDown().onTrue(new
-    // ReefAlgae(elevator,wrist,algae,GROUND_ALGAE).until(()->algae.holdingAlgae())).onFalse(new
-    // ParallelCommandGroup(new InstantCommand(()->elevator.setHeight(0)),new
-    // InstantCommand(()->algae.setClawSpeed(0)),wrist.WristPose(-50)));
-    // joystick.povLeft().onTrue(new
-    // ReefAlgae(elevator,wrist,algae,ALGAE_LOW).until(()->algae.holdingAlgae())).onFalse(new
-    // ParallelCommandGroup(new InstantCommand(()->elevator.setHeight(0)),new
-    // InstantCommand(()->algae.setClawSpeed(0)),wrist.WristPose(-50)));
-    // joystick.povUp().onTrue(new
-    // ReefAlgae(elevator,wrist,algae,ALGAE_HIGH).until(()->algae.holdingAlgae())).onFalse(new
-    // ParallelCommandGroup(new InstantCommand(()->elevator.setHeight(0)),new
-    // InstantCommand(()->algae.setClawSpeed(0)),wrist.WristPose(-50)));
-
-    // joystick.povDown().whileTrue(wrist.runOnce(()->wrist.setWristSpeed(0.1)));
-    // joystick.rightTrigger().toggleOnTrue(new ArmToPos(getFlipper(),
-    // -0.47)).toggleOnFalse(new ArmToPos(getFlipper(), 0));
-    // joystick.leftBumper().whileTrue(new ArmToPos(getFlipper(),-0.25)).onFalse(new
-    // ArmToPos(getFlipper(),0));
-    // joystick.leftBumper().and(joystick.rightBumper()).whileTrue(new
-    // OuttakeBucket(getClaw()));
-    // joystick.x().whileTrue(getClaw().runOnce(() ->
-    // getClaw().setClawSpeed(0.15))).whileFalse(getClaw().runOnce(() ->
-    // getClaw().setClawSpeed(0)));
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }

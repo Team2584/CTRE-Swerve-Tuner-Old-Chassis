@@ -59,6 +59,11 @@ public class Constants {
     public static final int CORAL_MECH_ID = 23;
     public static final int CORAL_SENSOR_ID = 26;
   }
+
+  public static final class RampConstants{
+    public static final int RAMP_ID = 28;
+    public static final double RAMP_GEAR_RATIO = 45;
+  }
   public static final class VisionConstants {
     // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.133332776929542,
-        "y": 4.184191012967569
+        "x": 3.669,
+        "y": 2.656
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.883332776929542,
-        "y": 4.184191012967569
+        "x": 3.811148552162922,
+        "y": 2.8616545382868686
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.15,
-        "y": 4.18
+        "x": 3.817,
+        "y": 2.884
       },
       "prevControl": {
-        "x": 6.4,
-        "y": 4.18
+        "x": 3.695842037144731,
+        "y": 2.665320444401491
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": "HPostCoralAlgae",
+  "folder": "D&KPostsCoralAlgae",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 59.99999999999999
   },
   "useDefaultConstraints": false
 }

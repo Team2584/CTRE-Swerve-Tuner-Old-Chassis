@@ -3,41 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.18,
-        "y": 3.854
+        "x": 3.8,
+        "y": 2.5
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9354867626774173,
-        "y": 3.9060891233755224
+        "x": 3.925,
+        "y": 2.7165063509461094
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.7835851862287826,
-        "y": 3.9265171182068968
+        "x": 3.977,
+        "y": 2.8030316069099217
       },
       "prevControl": {
-        "x": 2.549800986462823,
-        "y": 3.837945407487335
-      },
-      "nextControl": {
-        "x": 3.0173693859947437,
-        "y": 4.015088828926456
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 2.916516884775129,
-        "y": 3.989
-      },
-      "prevControl": {
-        "x": 3.165563537190609,
-        "y": 4.010812036141612
+        "x": 3.8519999999999994,
+        "y": 2.5865252559638114
       },
       "nextControl": null,
       "isLocked": false,
@@ -50,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxAcceleration": 1.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -58,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": "BackMidCoral&Algae",
+  "folder": "D&KPostsCoralAlgae",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 59.99999999999999
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

@@ -13,31 +13,19 @@
         {
           "type": "named",
           "data": {
-            "name": "liftL4"
+            "name": "liftL3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "approachCoralScoreL4"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.175
+            "pathName": "approachCoralScore"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "scoreCoral"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.15
           }
         },
         {
@@ -50,12 +38,6 @@
           "type": "named",
           "data": {
             "name": "liftLowAlgae"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.25
           }
         },
         {
@@ -95,21 +77,21 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "neutral"
+            "waitTime": 0.25
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "ReturntoMid"
+            "name": "neutral"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Center",
   "choreoAuto": false
 }

@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.18,
-        "y": 3.854
+        "x": 3.836,
+        "y": 5.165
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9354867626774173,
-        "y": 3.9060891233755224
+        "x": 3.3834682436342582,
+        "y": 5.849934534143518
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.7835851862287826,
-        "y": 3.9265171182068968
+        "x": 5.123034577546296,
+        "y": 6.321497757523148
       },
       "prevControl": {
-        "x": 2.549800986462823,
-        "y": 3.837945407487335
+        "x": 4.507173855388963,
+        "y": 6.3951338887060905
       },
       "nextControl": {
-        "x": 3.0173693859947437,
-        "y": 4.015088828926456
+        "x": 5.762014973958332,
+        "y": 6.245097294560185
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.916516884775129,
-        "y": 3.989
+        "x": 7.498,
+        "y": 6.032724971064815
       },
       "prevControl": {
-        "x": 3.165563537190609,
-        "y": 4.010812036141612
+        "x": 7.248,
+        "y": 6.032724971064815
       },
       "nextControl": null,
       "isLocked": false,
@@ -61,10 +61,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "BackMidCoral&Algae",
+  "folder": "KPostCoralAlgae",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -59.99999999999999
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

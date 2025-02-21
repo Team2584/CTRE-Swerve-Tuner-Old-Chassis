@@ -4,10 +4,16 @@
   "holonomicMode": true,
   "pathFolders": [
     "BackMidCoral&Algae",
-    "CloseMiddleCoral&Algae",
-    "Lolipop1"
+    "HPostCoralAlgae",
+    "KPostCoralAlgae",
+    "Lolipop1",
+    "D&KPostsCoralAlgae"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "BackBargeSide",
+    "Center",
+    "BackNonBargeSide"
+  ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,

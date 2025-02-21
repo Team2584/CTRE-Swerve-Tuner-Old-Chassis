@@ -5,21 +5,34 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "sequential",
           "data": {
-            "pathName": "BacksideCoralAlgaeStart"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "liftL4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "KPostStart"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "liftL3"
+                }
+              }
+            ]
           }
         },
         {
           "type": "wait",
           "data": {
             "waitTime": 0.25
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ApproachKL3"
           }
         },
         {
@@ -35,19 +48,63 @@
           }
         },
         {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "SetupForAlgaeBackBarge"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "liftLowAlgae"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.4
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RetrieveAlgaeBackBarge"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "BacksideCoraltoAlgae"
+                  "pathName": "ScoreBackBargeAlgae"
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "liftHighAlgae"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.65
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "liftNet"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -60,53 +117,27 @@
           }
         },
         {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "BacksideRetrieveAlgae&Score"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.5
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "algaeNeutral"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "liftNet"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "scoreNet"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "neutral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SetupForTeleopBargeSide"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "BackBargeSide",
   "choreoAuto": false
 }
