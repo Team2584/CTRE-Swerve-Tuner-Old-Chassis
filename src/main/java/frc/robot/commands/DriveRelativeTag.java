@@ -37,7 +37,7 @@ public class DriveRelativeTag extends Command{
 
     PathPlannerPath path;
 
-    private final Transform2d relativeTagVector; // A pose2d that is referenced off the tag (ID'd from vision.getPrimaryTagId(cameraIndex))  
+    private final Translation2d relativeTagVector; // A pose2d that is referenced off the tag (ID'd from vision.getPrimaryTagId(cameraIndex))  
     private final int cameraIndex;          // The camera being used
 
     private final Pose2d startPose;
@@ -50,7 +50,7 @@ public class DriveRelativeTag extends Command{
 
     private final PPHolonomicDriveController holonomicController;
 
-    public DriveRelativeTag(CommandSwerveDrivetrain drivetrain, VisionSubsystem vision, Telemetry logger, Transform2d relativeTagVector, int cameraIndex) {
+    public DriveRelativeTag(CommandSwerveDrivetrain drivetrain, VisionSubsystem vision, Telemetry logger, Translation2d relativeTagVector, int cameraIndex) {
         this.drivetrain = drivetrain;
         this.vision = vision;
         this.logger = logger;
@@ -89,10 +89,15 @@ public class DriveRelativeTag extends Command{
         Pose2d tagPose = maybeTagPose.get();
 
         // Calculate target pose (using relativeTagVector)
-        targetPose.transformBy(new Transform2d(tagPose.getTranslation(), tagPose.getRotation())).transformBy(relativeTagVector);
+        targetPose.transformBy(new Transform2d(
+                                    new Translation2d(  
+                                        tagPose.getTranslation().getX() + relativeTagVector.getX()*Math.cos(tagPose.getRotation().getRadians()), 
+                                        tagPose.getTranslation().getY() + relativeTagVector.getY()*Math.sin(tagPose.getRotation().getRadians())
+                                    ), 
+                                tagPose.getRotation().rotateBy(new Rotation2d(180))));
 
         // DOUBLE CHECK THIS ROTATION
-        targetPose.transformBy(new Transform2d(new Translation2d(0,0),Rotation2d.fromDegrees(180)));
+        // targetPose.transformBy(new Transform2d(new Translation2d(0,0),Rotation2d.fromDegrees(180)));
 
         // Get the robot's starting pose.
         startPose.transformBy(new Transform2d(logger.getPose().getTranslation(), logger.getPose().getRotation()));
