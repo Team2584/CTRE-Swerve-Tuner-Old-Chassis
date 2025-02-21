@@ -138,12 +138,12 @@ public class VisionSubsystem extends SubsystemBase {
       for (var rawSample : rawSamples) {
         if (rawSample.value.length == 0) continue;
 
-        // Accumulate tag IDs (starting at index 11, stepping by 7)
+        // Accumulate tag IDs
         for (int j = 11; j < rawSample.value.length; j += 7) {
           tagIdsSet.add((int) rawSample.value[j]);         
 
           int tagId = (int) rawSample.value[j];
-          double area = rawSample.value[j + 1]; // TA is assumed to be at offset 1 in the block.
+          double area = rawSample.value[j - 1]; // TA is assumed to be at offset 1 in the block.
           if (area > bestArea) {
             bestArea = area;
             bestTagId = tagId;
