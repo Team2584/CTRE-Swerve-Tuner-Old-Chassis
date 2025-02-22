@@ -46,6 +46,8 @@ public class DriveRelativeTag extends Command{
 
     private double totalTime;
     private final Timer timer = new Timer();
+    private double distanceToTarget;
+    Pose2d targetPose;
 
     private final PPHolonomicDriveController holonomicController;
 
@@ -85,7 +87,7 @@ public class DriveRelativeTag extends Command{
         Pose2d tagPose = maybeTagPose.get();
 
         // Calculate target pose (using relativeTagVector)
-        Pose2d targetPose = new Pose2d(
+        targetPose = new Pose2d(
                                     new Translation2d(  
                                         tagPose.getTranslation().getX() + 
                                         relativeTagVector.getX()*Math.cos(tagPose.getRotation().getRadians()) -
@@ -99,10 +101,10 @@ public class DriveRelativeTag extends Command{
                                     ), 
                                 tagPose.getRotation().rotateBy(new Rotation2d(Math.PI)));
 
+
         // Log TargetPose
         SmartDashboard.putNumber("TargetPoseX", targetPose.getX());
         SmartDashboard.putNumber("TargetPoseY", targetPose.getY());
-
 
         // Get the robot's starting pose.
         Pose2d startPose = new Pose2d(logger.getPose().getTranslation(), logger.getPose().getRotation());
@@ -114,6 +116,10 @@ public class DriveRelativeTag extends Command{
         );
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), travelDirection);
         Pose2d endWaypoint = new Pose2d(targetPose.getTranslation(), travelDirection);
+
+        distanceToTarget = targetPose.getTranslation().getDistance(startPose.getTranslation());
+
+
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
             startWaypoint, endWaypoint
@@ -151,16 +157,22 @@ public class DriveRelativeTag extends Command{
         } catch (Exception ex) {
             DriverStation.reportError("Failed to load PathPlanner config and configure FollowPathCommand", ex.getStackTrace());
         }
+
+
         followCommand.initialize();
     }
 
     @Override
-    public void execute() {     
+    public void execute() {
+        distanceToTarget = targetPose.getTranslation().getDistance(logger.getPose().getTranslation());
         followCommand.execute();
     }
 
     @Override
     public boolean isFinished() {
+        if (Math.abs(distanceToTarget) < 0.05){
+            return true;
+        }
         return false;
     }
 
