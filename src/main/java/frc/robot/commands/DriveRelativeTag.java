@@ -87,12 +87,12 @@ public class DriveRelativeTag extends Command{
                                     new Translation2d(  
                                         tagPose.getTranslation().getX() + 
                                         relativeTagVector.getX()*Math.cos(tagPose.getRotation().getRadians()) -
-                                        relativeTagVector.getY()*Math.cos(tagPose.getRotation().getRadians()), 
+                                        relativeTagVector.getY()*Math.sin(tagPose.getRotation().getRadians()), 
                                         
                                         
                                         
                                         tagPose.getTranslation().getY() + 
-                                        relativeTagVector.getY()*Math.sin(tagPose.getRotation().getRadians()) +
+                                        relativeTagVector.getY()*Math.cos(tagPose.getRotation().getRadians()) +
                                         relativeTagVector.getX()*Math.sin(tagPose.getRotation().getRadians())
                                     ), 
                                 tagPose.getRotation().rotateBy(new Rotation2d(Math.PI)));
