@@ -258,14 +258,14 @@ public class RobotContainer {
     blue4.whileTrue(new DriveRelativeTag(getDrivetrain(), 
                                                       getVision(), 
                                                       logger, 
-                                                      new Translation2d(.3,-.7), 
+                                                      new Translation2d(.7,0), 
                                                       0));
 
     // Right
     redL4.whileTrue(new DriveRelativeTag(getDrivetrain(), 
                                                       getVision(), 
                                                       logger, 
-                                                      new Translation2d(.3,.7), 
+                                                      new Translation2d(.7,0), 
                                                       0));
 
     /* RUSH WAY OF CORAL */
