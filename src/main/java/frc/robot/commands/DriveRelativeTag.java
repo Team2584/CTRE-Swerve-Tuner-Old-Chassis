@@ -85,13 +85,18 @@ public class DriveRelativeTag extends Command{
         // Calculate target pose (using relativeTagVector)
         Pose2d targetPose = new Pose2d(
                                     new Translation2d(  
-                                        tagPose.getTranslation().getX() + relativeTagVector.getX()*Math.cos(tagPose.getRotation().getRadians()), 
-                                        tagPose.getTranslation().getY() + relativeTagVector.getY()*Math.sin(tagPose.getRotation().getRadians())
+                                        tagPose.getTranslation().getX() + 
+                                        relativeTagVector.getX()*Math.cos(tagPose.getRotation().getRadians()) -
+                                        relativeTagVector.getY()*Math.cos(tagPose.getRotation().getRadians()), 
+                                        
+                                        
+                                        
+                                        tagPose.getTranslation().getY() + 
+                                        relativeTagVector.getY()*Math.sin(tagPose.getRotation().getRadians()) +
+                                        relativeTagVector.getX()*Math.sin(tagPose.getRotation().getRadians())
                                     ), 
                                 tagPose.getRotation().rotateBy(new Rotation2d(Math.PI)));
 
-        // DOUBLE CHECK THIS ROTATION
-        // targetPose.transformBy(new Transform2d(new Translation2d(0,0),Rotation2d.fromDegrees(180)));
 
         // Get the robot's starting pose.
         Pose2d startPose = new Pose2d(logger.getPose().getTranslation(), logger.getPose().getRotation());

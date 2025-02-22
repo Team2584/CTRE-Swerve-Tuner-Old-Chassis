@@ -253,10 +253,19 @@ public class RobotContainer {
     joystick.leftBumper().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,ALGAE_LOW)).onFalse(new NeutralState(this));
     joystick.leftTrigger().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,GROUND_ALGAE)).onFalse(new NeutralState(this));
     
-    joystick.y().whileTrue(new DriveRelativeTag(getDrivetrain(), 
+
+    // Left
+    blue4.whileTrue(new DriveRelativeTag(getDrivetrain(), 
                                                       getVision(), 
                                                       logger, 
-                                                      new Translation2d(.6,-.6), 
+                                                      new Translation2d(.3,-.7), 
+                                                      0));
+
+    // Right
+    redL4.whileTrue(new DriveRelativeTag(getDrivetrain(), 
+                                                      getVision(), 
+                                                      logger, 
+                                                      new Translation2d(.3,.7), 
                                                       0));
 
     /* RUSH WAY OF CORAL */
