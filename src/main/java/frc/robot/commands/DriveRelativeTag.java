@@ -40,9 +40,6 @@ public class DriveRelativeTag extends Command{
     private final Translation2d relativeTagVector; // A pose2d that is referenced off the tag (ID'd from vision.getPrimaryTagId(cameraIndex))  
     private final int cameraIndex;          // The camera being used
 
-    private final Pose2d startPose;
-    private final Pose2d targetPose;
-
     private FollowPathCommand followCommand;
 
     private double totalTime;
@@ -56,9 +53,6 @@ public class DriveRelativeTag extends Command{
         this.logger = logger;
         this.relativeTagVector = relativeTagVector;
         this.cameraIndex = cameraIndex;
-
-        startPose = new Pose2d(new Translation2d(0,0),Rotation2d.fromDegrees(0));
-        targetPose = new Pose2d(new Translation2d(0,0),Rotation2d.fromDegrees(0));
 
         holonomicController = new PPHolonomicDriveController(
             new PIDConstants(10, 0, 0),             // TRANSLATION PID
@@ -89,18 +83,18 @@ public class DriveRelativeTag extends Command{
         Pose2d tagPose = maybeTagPose.get();
 
         // Calculate target pose (using relativeTagVector)
-        targetPose.transformBy(new Transform2d(
+        Pose2d targetPose = new Pose2d(
                                     new Translation2d(  
                                         tagPose.getTranslation().getX() + relativeTagVector.getX()*Math.cos(tagPose.getRotation().getRadians()), 
                                         tagPose.getTranslation().getY() + relativeTagVector.getY()*Math.sin(tagPose.getRotation().getRadians())
                                     ), 
-                                tagPose.getRotation().rotateBy(new Rotation2d(180))));
+                                tagPose.getRotation().rotateBy(new Rotation2d(Math.PI)));
 
         // DOUBLE CHECK THIS ROTATION
         // targetPose.transformBy(new Transform2d(new Translation2d(0,0),Rotation2d.fromDegrees(180)));
 
         // Get the robot's starting pose.
-        startPose.transformBy(new Transform2d(logger.getPose().getTranslation(), logger.getPose().getRotation()));
+        Pose2d startPose = new Pose2d(logger.getPose().getTranslation(), logger.getPose().getRotation());
 
         // PATH CALCS
 
@@ -156,15 +150,12 @@ public class DriveRelativeTag extends Command{
 
     @Override
     public boolean isFinished() {
-        if (followCommand.isFinished()){
-            return true;
-        }
         return false;
     }
 
     @Override
     public void end(boolean interrupted) {
-        followCommand.end(interrupted);
+        // followCommand.end(interrupted);
         drivetrain.setControl(
             new SwerveRequest.FieldCentric()
             .withVelocityX(0)

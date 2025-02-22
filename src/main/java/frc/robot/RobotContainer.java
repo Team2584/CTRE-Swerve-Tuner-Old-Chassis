@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.EventMarker;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -252,7 +253,11 @@ public class RobotContainer {
     joystick.leftBumper().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,ALGAE_LOW)).onFalse(new NeutralState(this));
     joystick.leftTrigger().and(joystick.povLeft()).onTrue( new ScoreCoralState(this,GROUND_ALGAE)).onFalse(new NeutralState(this));
     
-
+    joystick.y().whileTrue(new DriveRelativeTag(getDrivetrain(), 
+                                                      getVision(), 
+                                                      logger, 
+                                                      new Translation2d(.6,-.6), 
+                                                      0));
 
     /* RUSH WAY OF CORAL */
     // redL4.onTrue(
